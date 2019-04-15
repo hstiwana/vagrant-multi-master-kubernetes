@@ -16,3 +16,7 @@ Vagrant CentOS based Multi-Master Kubernetes lab
 4) Add newly generated image "kub-base-centos76" in your vagrant "box"
 
      vagrant box add kub-base-centos76 --name kub-base-centos76
+
+5) Now we are ready to build our lab with 3 masters and 3 nodes
+
+     cd ../; vagrant validate; vagrant up
