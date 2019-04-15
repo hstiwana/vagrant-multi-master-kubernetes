@@ -1,0 +1,40 @@
+apiVersion: kubeadm.k8s.io/v1alpha2
+kind: MasterConfiguration
+kubernetesVersion: v1.14.0
+apiServerCertSANs:
+- 192.168.0.10
+- lb.lk8s.net
+- lb.pk8s.com
+- 192.168.0.21
+- 192.168.0.22
+- 192.168.0.23
+- 10.10.10.21
+- 10.10.10.22
+- 10.10.10.23
+- kmaster1.lk8s.net
+- kmaster2.lk8s.net
+- kmaster3.lk8s.net
+- hstiwana.ddns.net
+- 24.6.63.84
+api:
+    controlPlaneEndpoint: "lb.lk8s.net:443"
+etcd:
+  local:
+    extraArgs:
+      listen-client-urls: "https://127.0.0.1:2379,https://10.10.10.22:2379"
+      advertise-client-urls: "https://10.10.10.22:2379"
+      listen-peer-urls: "https://10.10.10.22:2380"
+      initial-advertise-peer-urls: "https://10.10.10.22:2380"
+      initial-cluster: "kmaster2.lk8s.net=https://10.10.10.22:2380"
+    serverCertSANs:
+      - kmaster2.lk8s.net
+      - 10.10.10.22
+    peerCertSANs:
+      - kmaster2.lk8s.net
+      - 10.10.10.22
+networking:
+    # This CIDR is a Calico default. Substitute or remove for your CNI provider.
+    # podSubnet: "192.168.0.0/16" 
+    dnsDomain: cluster.local
+    podSubnet: 10.244.0.0/16
+    serviceSubnet: 10.96.0.0/12

@@ -1,0 +1,98 @@
+#!/bin/bash
+
+source /vagrant/source_in_all.sh
+
+# Download required images first
+echo "[PRE-Flight-TASK] kubeadm config images pull"
+pub_net
+
+################################### ETCD HA Cluster #####################
+echo "[ETCD HA TASK 1] Create temp directories to store ETCD files and certs that will end up on other hosts" 
+# Create temp directories to store files that will end up on other hosts.
+mkdir -p /tmp/${CONTROLLER1_IP}/ /tmp/${CONTROLLER2_IP}/ /tmp/${CONTROLLER3_IP}/
+
+for i in "${!ETCDHOSTS[@]}"; do
+HOST=${ETCDHOSTS[$i]}
+NAME=${NAMES[$i]}
+cat << EOF > /tmp/${HOST}/kubeadmcfg.yaml
+apiVersion: "kubeadm.k8s.io/v1beta1"
+kind: ClusterConfiguration
+etcd:
+    local:
+        serverCertSANs:
+        - "${HOST}"
+        - "${LB}"
+        peerCertSANs:
+        - "${HOST}"
+        - "${LB}"
+        extraArgs:
+            initial-cluster: ${NAMES[0]}=https://${ETCDHOSTS[0]}:2380,${NAMES[1]}=https://${ETCDHOSTS[1]}:2380,${NAMES[2]}=https://${ETCDHOSTS[2]}:2380
+            initial-cluster-state: new
+            name: ${NAME}
+            listen-peer-urls: https://${HOST}:2380
+            listen-client-urls: https://${HOST}:2379
+            advertise-client-urls: https://${HOST}:2379
+            initial-advertise-peer-urls: https://${HOST}:2380
+EOF
+done
+
+
+# Initialize Kubernetes
+echo "[ETCD HA TASK 2] Initialize [CA] for the [ETCD] Cluster"
+kubeadm init phase certs etcd-ca
+# Above command creates following two files
+# /etc/kubernetes/pki/etcd/ca.crt
+# /etc/kubernetes/pki/etcd/ca.key
+
+echo "[ETCD HA TASK 3] Create certificates for each member"
+kubeadm init phase certs etcd-server --config=/tmp/${CONTROLLER3_IP}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${CONTROLLER3_IP}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${CONTROLLER3_IP}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${CONTROLLER3_IP}/kubeadmcfg.yaml
+cp -R /etc/kubernetes/pki /tmp/${CONTROLLER3_IP}/
+# cleanup non-reusable certificates
+find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+kubeadm init phase certs etcd-server --config=/tmp/${CONTROLLER2_IP}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${CONTROLLER2_IP}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${CONTROLLER2_IP}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${CONTROLLER2_IP}/kubeadmcfg.yaml
+cp -R /etc/kubernetes/pki /tmp/${CONTROLLER2_IP}/
+find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+kubeadm init phase certs etcd-server --config=/tmp/${CONTROLLER1_IP}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${CONTROLLER1_IP}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${CONTROLLER1_IP}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${CONTROLLER1_IP}/kubeadmcfg.yaml
+# No need to move the certs because they are for CONTROLLER1_IP
+
+# clean up certs that should not be copied off this host
+find /tmp/${CONTROLLER3_IP} -name ca.key -type f -delete
+find /tmp/${CONTROLLER2_IP} -name ca.key -type f -delete
+
+# Configure the kubelet to be a service manager for etcd
+echo "[ETCD HA TASK 4] Configure the kubelet to be a service manager for etcd"
+mkdir /etc/systemd/system/kubelet.service.d 2>/dev/null
+cat << EOF > /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/kubelet --address=127.0.0.1 --pod-manifest-path=/etc/kubernetes/manifests --allow-privileged=true
+Restart=always
+EOF
+
+systemctl daemon-reload
+systemctl restart kubelet
+
+echo "[ETCD HA TASK 5] The certificates have been generated and now they must be moved to their respective hosts"
+#rm -rf /tmp/pki /tmp/kubeadmcfg.yaml
+#sshpass -p ${rootpwd} scp ${opts} -qpr root@${CP0_HOSTNAME}:/tmp/${CP1_IP}/* /tmp/
+#sudo su - -c "cd /tmp; chown -R root:root pki; mv -f pki /etc/kubernetes/"
+
+#echo "[TASK 8] On each host run the kubeadm command to generate a static manifest for etcd"
+#sshpass -p ${rootpwd} ssh ${opts} -qt root@${CP0_IP} "kubeadm init phase etcd local --config=/tmp/${CP0_IP}/kubeadmcfg.yaml"
+#sudo su - -c "kubeadm init phase etcd local --config=/tmp/kubeadmcfg.yaml"
+
+
+# echo "[TASK 9] Join ETCD cluster by Finding the IP and Name of 2 New Master VMs"
+
+# KUBECONFIG=/etc/kubernetes/admin.conf kubectl exec -n kube-system etcd-${CP0_HOSTNAME} -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --endpoints=https://${CP0_IP}:2379 member add ${CP1_HOSTNAME} https://${CP1_IP}:2380

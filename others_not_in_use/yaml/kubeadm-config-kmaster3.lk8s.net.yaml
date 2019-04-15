@@ -1,0 +1,51 @@
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: ClusterConfiguration
+kubernetesVersion: stable
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controlPlaneEndpoint: "lb.lk8s.net:443"
+controllerManager: {}
+imageRepository: k8s.gcr.io
+Networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+  podSubnet: 10.244.0.0/16
+apiEndpoints:
+  kmaster1.lk8s.net:
+    advertiseAddress: 10.10.10.21
+    bindPort: 6443
+  kmaster2.lk8s.net:
+    advertiseAddress: 10.10.10.22
+    bindPort: 6443
+  kmaster3.lk8s.net:
+    advertiseAddress: 10.10.10.23
+    bindPort: 6443
+apiServer:
+        certSANs:
+        - 127.0.0.1
+        - 10.10.10.21
+        - 10.10.10.22
+        - 10.10.10.23
+        - 10.10.10.10
+        - 192.168.0.10
+        - lb.lk8s.net
+        - kmaster1.lk8s.net
+        - kmaster2.lk8s.net
+        - kmaster3.lk8s.net
+        - hstiwana.ddns.net
+        - 24.6.63.84
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+    extraArgs:
+      listen-client-urls: "https://127.0.0.1:2379,https://10.10.10.23:2379"
+      advertise-client-urls: "https://10.10.10.23:2379"
+      listen-peer-urls: "https://10.10.10.23:2380"
+      initial-advertise-peer-urls: "https://10.10.10.23:2380"
+      initial-cluster: "kmaster3.lk8s.net=https://10.10.10.23:2380"
+    serverCertSANs:
+      - kmaster3.lk8s.net
+      - 10.10.10.23
+    peerCertSANs:
+      - kmaster3.lk8s.net
+      - 10.10.10.23

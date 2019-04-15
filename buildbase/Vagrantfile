@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+Vagrant.configure(2) do |config|
+  #
+  #Install vagrant-scp and vagrant-vbguest plugins
+ config.vagrant.plugins = ["vagrant-scp", "vagrant-vbguest"]
+  
+    config.vm.box = "centos/7"
+    config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+    config.vm.provider "virtualbox" do |v|
+      v.name = "base"
+      v.memory = 2048
+      v.cpus = 2
+    end
+end

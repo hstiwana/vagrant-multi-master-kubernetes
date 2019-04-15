@@ -1,0 +1,46 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+
+Vagrant.configure(2) do |config|
+
+  config.vm.provision "shell", path: "bootstrap.sh"
+
+  DNS_Name = "lk8s.net"
+  MasterCount = 1
+  # Kubernetes Master Server
+  (1..MasterCount).each do |m|
+    config.vm.define "kmaster#{m}" do |kmaster|
+    kmaster.vm.box = "centos/7"
+    kmaster.vm.hostname = "kmaster#{m}.#{DNS_Name}"
+    kmaster.vm.network "public_network", ip: "192.168.0.2#{m}"
+    kmaster.vm.network "private_network", ip: "10.10.10.2#{m}"
+    kmaster.vm.provider "virtualbox" do |v|
+      v.name = "kmaster#{m}"
+      v.memory = 2048
+      v.cpus = 2
+    end
+    kmaster.vm.provision "shell", path: "bootstrap_kmaster.sh"
+  end
+end
+
+  NodeCount = 3
+
+  # Kubernetes Worker Nodes
+  (1..NodeCount).each do |i|
+    config.vm.define "node#{i}" do |workernode|
+      workernode.vm.box = "centos/7"
+      workernode.vm.hostname = "node#{i}.#{DNS_Name}"
+      workernode.vm.network "public_network", ip: "192.168.0.4#{i}"
+      workernode.vm.network "private_network", ip: "10.10.10.4#{i}"
+      workernode.vm.provider "virtualbox" do |v|
+        v.name = "node#{i}"
+        v.memory = 4096
+        v.cpus = 4
+      end
+      workernode.vm.provision "shell", path: "bootstrap_kworker.sh"
+    end
+  end
+
+end

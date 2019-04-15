@@ -1,0 +1,225 @@
+#!/bin/bash
+export k8s_ver="1.13.2-0" # yum list --showduplicates kubeadm --disableexcludes=kubernetes #1.13.2-0
+export pods_ver="1.13.2" #will use during intial cluster setup with /etc/kubernetes/pki/kubeadm-config-`hostname -f`.yaml
+export cni_ver="0.6.0"
+export K8S_CLUSTER_NAME="lk8s.net"
+export tokenTTL=0 #never expire
+export docker_ver="ce-18.06.3.ce"
+export public_gw=192.168.0.1
+export private_gw=10.10.10.1
+export LOCAL_CERTS_DIR=/etc/kubernetes/pki
+
+export public_eth=eth1
+export nat_eth=eth0
+export private_eth=eth2
+
+# SSH password and Options
+export rootpwd=kubeadmin
+export opts=" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+#export net_plugin=weave-net
+export net_plugin=flannel
+
+# Following IP/Vars are for "MASTER" nodes, we will run ETCD on them.
+export PUB_HOST=hstiwana.ddns.net
+export PUB_IP=24.6.63.84
+export CONTROLLER1_IP=10.10.10.21
+export CONTROLLER2_IP=10.10.10.22
+export CONTROLLER3_IP=10.10.10.23
+export WHOST1=10.10.10.41
+export WHOST2=10.10.10.42
+export WHOST3=10.10.10.43
+export ETCD_VIP=10.10.10.110
+export LLBIP=10.10.10.10
+export PLBIP=192.168.0.10
+export MST1=kmaster1.lk8s.net
+export MST2=kmaster2.lk8s.net
+export MST3=kmaster3.lk8s.net
+export WKR1=node1.lk8s.net
+export WKR2=node2.lk8s.net
+export WKR3=node3.lk8s.net
+export LPLB=lb.lk8s.net
+export PPLB=lb.pk8s.com
+export controlPlaneEndpointPort=6443
+export controlPlaneEndpoint=${LPLB}:${controlPlaneEndpointPort}
+export dnsDomain=cluster.local
+export serviceSubnet="10.96.0.0/12"
+export podSubnet="10.244.0.0/16"
+export ETCDHOSTS=(${CONTROLLER1_IP} ${CONTROLLER2_IP} ${CONTROLLER3_IP})
+export NAMES=(${MST1} ${MST2} ${MST3})
+export MY_IP=$(ip a show dev eth2|grep -w inet|awk -F/ '{print $1}'|awk '{print $2}')
+export MY_HOSTNAME=$(hostname -f)
+
+export CP0_HOSTNAME=${MST1}
+export kubeconfig=/etc/kubernetes/admin.conf
+
+export kubeadminitopts=" --ignore-preflight-errors=Port-6443 --ignore-preflight-errors=Port-10251 --ignore-preflight-errors=Port-10252 --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests --ignore-preflight-errors=Port-10250 --ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml --ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml --ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml --ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-etcd.yaml"
+
+export etchosts="
+${PLBIP} ${PPLB} lbp
+${LLBIP} ${LPLB} lb
+${CONTROLLER1_IP} ${MST1} kmaster1
+${CONTROLLER2_IP} ${MST2} kmaster2
+${CONTROLLER3_IP} ${MST3} kmaster3
+${WHOST1} ${WKR1} node1
+${WHOST2} ${WKR2} node2
+${WHOST3} ${WKR3} node3
+"
+
+pub_net(){
+	echo "[FIX_NET public_net] setting gateway to public address ${public_gw}"
+	#delete virtualbox route for first interface used as NAT
+	eval `route -n | awk '{ if ($8 == "eth0" && $2 != "0.0.0.0") print "route del default gw " $2; }'` 2>/dev/null
+	route delete default gw ${private_gw} > /dev/null 2>&1
+
+	route add default gw ${public_gw} > /dev/null 2>&1
+	route -A inet6 add default gw fc00::1 ${public_eth} > /dev/null 2>&1
+	echo '.... done'
+}
+
+pri_net(){
+	echo "[FIX_NET private_net] setting gateway to private address ${private_gw}"
+	route delete default gw ${public_gw} > /dev/null 2>&1
+	route -A inet6 delete default gw fc00::1 ${public_eth} > /dev/null 2>&1
+
+	route add default gw ${private_gw} > /dev/null 2>&1
+	route -A inet6 add default gw fc00::1 ${private_eth} > /dev/null 2>&1
+	echo '.... done'
+}
+
+etcd_status(){
+echo "Checking cluster state to ensure ETCD cluster is up before starting K8s HA config"
+until echo ${state} | grep -m 1 "cluster is healthy"; do
+    state=$(docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.2.24 etcdctl --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --ca-file /etc/kubernetes/pki/etcd/ca.crt --endpoints https://${MY_IP}:2379 cluster-health|tail -1);
+    sleep 5;
+    echo "ETCD : ${state}";
+done
+}
+#etcd_gen_certs(){
+#  #Download cfssl and cfssljson
+#  curl -o /usr/local/bin/cfssl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 
+#  curl -o /usr/local/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+#  chmod +x /usr/local/bin/cfssl*
+#  export PATH=$PATH:/usr/local/bin
+#
+#  mkdir -p /etc/kubernetes/pki/etcd 2>/dev/null
+#  cat >/etc/kubernetes/pki/etcd/ca-config.json<<EOF
+#{
+#    "signing": {
+#        "default": {
+#            "expiry": "43800h"
+#        },
+#        "profiles": {
+#            "server": {
+#                "expiry": "43800h",
+#                "usages": [
+#                    "signing",
+#                    "key encipherment",
+#                    "server auth",
+#                    "client auth"
+#                ]
+#            },
+#            "client": {
+#                "expiry": "43800h",
+#                "usages": [
+#                    "signing",
+#                    "key encipherment",
+#                    "client auth"
+#                ]
+#            },
+#            "peer": {
+#                "expiry": "43800h",
+#                "usages": [
+#                    "signing",
+#                    "key encipherment",
+#                    "server auth",
+#                    "client auth"
+#                ]
+#            }
+#        }
+#    }
+#}	
+#EOF
+#cat >/etc/kubernetes/pki/etcd/ca-csr.json<<EOF
+#{
+#    "CN": "etcd",
+#    "key": {
+#        "algo": "rsa",
+#        "size": 2048
+#    }
+#}
+#EOF
+#cat >/etc/kubernetes/pki/etcd/client.json<<EOF
+#{
+#    "CN": "client",
+#    "key": {
+#        "algo": "ecdsa",
+#        "size": 256
+#    }
+#}
+#EOF
+#cd /etc/kubernetes/pki/etcd
+### Do only on Master1 node
+#cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+#cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=client client.json | cfssljson -bare client
+#	
+## Copy over CA cert to all other Masters and do the following on all of them
+#export PEER_NAME=${MY_HOSTNAME}
+#export PRIVATE_IP=${MY_IP}
+#
+#cfssl print-defaults csr > config.json
+#sed -i 's/www\.example\.net/'"$PRIVATE_IP"'/' config.json
+#sed -i 's/example\.net/'"$PEER_NAME"'/' config.json
+#sed -i '0,/CN/{s/example\.net/'"$PEER_NAME"'/}' config.json
+#
+#cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=server config.json | cfssljson -bare server
+#cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=peer config.json | cfssljson -bare peer
+## On all masters, Install etcd and set it’s environment file
+#
+#yum -d0 -q -y install etcd
+#cat >/etc/etcd.env<<EOF
+#"PEER_NAME=$PEER_NAME"
+#"PRIVATE_IP=$PRIVATE_IP"
+#EOF
+#
+#cat >/etc/systemd/system/etcd.service<<EOF
+#[Unit]
+#Description=etcd
+#Documentation=https://github.com/coreos/etcd
+#Conflicts=etcd.service
+#Conflicts=etcd2.service
+#
+#[Service]
+#EnvironmentFile=/etc/etcd.env
+#Type=notify
+#Restart=always
+#RestartSec=5s
+#LimitNOFILE=40000
+#TimeoutStartSec=0
+#
+#ExecStart=/bin/etcd --name ${MY_HOSTNAME}  --data-dir /var/lib/etcd --listen-client-urls http://${MY_IP}:2379,http://127.0.0.1:2379 --advertise-client-urls http://${MY_IP}:2379 --listen-peer-urls http://${MY_IP}:2380 --initial-advertise-peer-urls http://${MY_IP}:2380 --cert-file=/etc/kubernetes/pki/etcd/server.pem --key-file=/etc/kubernetes/pki/etcd/server-key.pem --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem --initial-cluster ${MST1}=http://${CONTROLLER1_IP}:2380,${MST2}=http://${CONTROLLER2_IP}:2380,${MST3}=http://${CONTROLLER3_IP}:2380 --initial-cluster-token my-etcd-token --initial-cluster-state new --client-cert-auth=false --peer-client-cert-auth=false
+#
+#[Install]
+#WantedBy=multi-user.target
+#EOF
+#systemctl daemon-reload
+#systemctl enable --now etcd
+#etcdctl cluster-health
+#}
+
+#export kubeadminitopts="--kubernetes-version=${pods_ver} \
+#--pod-network-cidr=${podSubnet} \
+#--node-name=${MST1} \
+#--service-cidr=${serviceSubnet} \
+#--service-dns-domain=${dnsDomain} \
+#--apiserver-cert-extra-sans=${CONTROLLER1_IP},${CONTROLLER2_IP},${CONTROLLER3_IP},${LLBIP},${PLBIP},${LPLB},${MST1},${MST2},${MST3},${PUB_HOST},${PUB_IP} \
+#--ignore-preflight-errors=Port-6443 \
+#--ignore-preflight-errors=Port-10250 \
+#--ignore-preflight-errors=Port-10251 \
+#--ignore-preflight-errors=Port-10252 \
+#--ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests \
+#--ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests \
+#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml \
+#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml \
+#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml \
+#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-etcd.yaml"
+
