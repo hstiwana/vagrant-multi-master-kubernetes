@@ -27,8 +27,8 @@ export opts=" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 export net_plugin=flannel
 
 # Following IP/Vars are for "MASTER" nodes, we will run ETCD on them.
-export PUB_HOST=hstiwana.ddns.net
-export PUB_IP=24.6.63.84
+export PUB_HOST=YOUR_PUBLIC_HOSTNAME
+export PUB_IP=YOUR_PUBLIC_IP
 export K8S_API_ADDVERTISE_IP_1=10.10.10.21
 export CONTROLLER1_IP=${K8S_API_ADDVERTISE_IP_1}
 export CONTROLLER2_IP=10.10.10.22
@@ -104,132 +104,5 @@ until echo ${state} | grep -m 1 "cluster is healthy"; do
     echo "ETCD : ${state}";
 done
 }
-#etcd_gen_certs(){
-#  #Download cfssl and cfssljson
-#  curl -o /usr/local/bin/cfssl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 
-#  curl -o /usr/local/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
-#  chmod +x /usr/local/bin/cfssl*
-#  export PATH=$PATH:/usr/local/bin
-#
-#  mkdir -p /etc/kubernetes/pki/etcd 2>/dev/null
-#  cat >/etc/kubernetes/pki/etcd/ca-config.json<<EOF
-#{
-#    "signing": {
-#        "default": {
-#            "expiry": "43800h"
-#        },
-#        "profiles": {
-#            "server": {
-#                "expiry": "43800h",
-#                "usages": [
-#                    "signing",
-#                    "key encipherment",
-#                    "server auth",
-#                    "client auth"
-#                ]
-#            },
-#            "client": {
-#                "expiry": "43800h",
-#                "usages": [
-#                    "signing",
-#                    "key encipherment",
-#                    "client auth"
-#                ]
-#            },
-#            "peer": {
-#                "expiry": "43800h",
-#                "usages": [
-#                    "signing",
-#                    "key encipherment",
-#                    "server auth",
-#                    "client auth"
-#                ]
-#            }
-#        }
-#    }
-#}	
-#EOF
-#cat >/etc/kubernetes/pki/etcd/ca-csr.json<<EOF
-#{
-#    "CN": "etcd",
-#    "key": {
-#        "algo": "rsa",
-#        "size": 2048
-#    }
-#}
-#EOF
-#cat >/etc/kubernetes/pki/etcd/client.json<<EOF
-#{
-#    "CN": "client",
-#    "key": {
-#        "algo": "ecdsa",
-#        "size": 256
-#    }
-#}
-#EOF
-#cd /etc/kubernetes/pki/etcd
-### Do only on Master1 node
-#cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
-#cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=client client.json | cfssljson -bare client
-#	
-## Copy over CA cert to all other Masters and do the following on all of them
-#export PEER_NAME=${MY_HOSTNAME}
-#export PRIVATE_IP=${MY_IP}
-#
-#cfssl print-defaults csr > config.json
-#sed -i 's/www\.example\.net/'"$PRIVATE_IP"'/' config.json
-#sed -i 's/example\.net/'"$PEER_NAME"'/' config.json
-#sed -i '0,/CN/{s/example\.net/'"$PEER_NAME"'/}' config.json
-#
-#cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=server config.json | cfssljson -bare server
-#cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=peer config.json | cfssljson -bare peer
-## On all masters, Install etcd and set it’s environment file
-#
-#yum -d0 -q -y install etcd
-#cat >/etc/etcd.env<<EOF
-#"PEER_NAME=$PEER_NAME"
-#"PRIVATE_IP=$PRIVATE_IP"
-#EOF
-#
-#cat >/etc/systemd/system/etcd.service<<EOF
-#[Unit]
-#Description=etcd
-#Documentation=https://github.com/coreos/etcd
-#Conflicts=etcd.service
-#Conflicts=etcd2.service
-#
-#[Service]
-#EnvironmentFile=/etc/etcd.env
-#Type=notify
-#Restart=always
-#RestartSec=5s
-#LimitNOFILE=40000
-#TimeoutStartSec=0
-#
-#ExecStart=/bin/etcd --name ${MY_HOSTNAME}  --data-dir /var/lib/etcd --listen-client-urls http://${MY_IP}:2379,http://127.0.0.1:2379 --advertise-client-urls http://${MY_IP}:2379 --listen-peer-urls http://${MY_IP}:2380 --initial-advertise-peer-urls http://${MY_IP}:2380 --cert-file=/etc/kubernetes/pki/etcd/server.pem --key-file=/etc/kubernetes/pki/etcd/server-key.pem --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem --initial-cluster ${MST1}=http://${CONTROLLER1_IP}:2380,${MST2}=http://${CONTROLLER2_IP}:2380,${MST3}=http://${CONTROLLER3_IP}:2380 --initial-cluster-token my-etcd-token --initial-cluster-state new --client-cert-auth=false --peer-client-cert-auth=false
-#
-#[Install]
-#WantedBy=multi-user.target
-#EOF
-#systemctl daemon-reload
-#systemctl enable --now etcd
-#etcdctl cluster-health
-#}
-
-#export kubeadminitopts="--kubernetes-version=${pods_ver} \
-#--pod-network-cidr=${podSubnet} \
-#--node-name=${MST1} \
-#--service-cidr=${serviceSubnet} \
-#--service-dns-domain=${dnsDomain} \
-#--apiserver-cert-extra-sans=${CONTROLLER1_IP},${CONTROLLER2_IP},${CONTROLLER3_IP},${LLBIP},${PLBIP},${K8S_API_ENDPOINT},${MST1},${MST2},${MST3},${PUB_HOST},${PUB_IP} \
-#--ignore-preflight-errors=Port-6443 \
-#--ignore-preflight-errors=Port-10250 \
-#--ignore-preflight-errors=Port-10251 \
-#--ignore-preflight-errors=Port-10252 \
-#--ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests \
-#--ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests \
-#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-scheduler.yaml \
-#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-apiserver.yaml \
-#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-kube-controller-manager.yaml \
-#--ignore-preflight-errors=FileAvailable--etc-kubernetes-manifests-etcd.yaml"
-
+# version check using ETCDCTL_API 3
+#docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.2.24 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl  --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --cacert=/etc/kubernetes/pki/etcd/ca.crt --endpoints https://10.10.10.21:2379,https://10.10.10.22:2379,https://10.10.10.23:2379 --write-out="table" endpoint status"
