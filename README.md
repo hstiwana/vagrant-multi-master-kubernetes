@@ -19,4 +19,4 @@ Vagrant CentOS based Multi-Master Kubernetes lab
 
 5) Now we are ready to build our lab with 3 masters and 3 nodes
 
-     cd ../; vagrant validate; vagrant up
+     cd ../ && vagrant validate && vagrant up
