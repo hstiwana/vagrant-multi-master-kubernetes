@@ -14,8 +14,8 @@ echo ${rootpwd} | passwd --stdin root >/dev/null 2>&1
 # Remove eth0 and setup gateway
 echo "[TASK 3] Update gateway to ${public_gw} for installations to work"
 #call pub_net function from sourced script
-pub_net
 yum -d0 -q -y install net-tools vim lsof
+pub_net
 
 # Update hosts file
 echo "[TASK 4] Update /etc/hosts file"
@@ -170,6 +170,7 @@ systemctl restart nginx
 mkdir /kube
 # 1. kubeadm init config template
 echo '[TASK 1. kubeadm init config template]'
+export KUBEADM_TOKEN=$(kubeadm token generate)
 cat >/kube/kubeadm-init-config.tmpl.yaml <<EOF
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: InitConfiguration
@@ -386,8 +387,8 @@ for WORKER in ${WKR1} ${WKR2} ${WKR3}
 do
        echo "[BOOTSTRAP TASK Node Join] Joining ${WORKER} in K8s Cluster"
        cat /etc/hosts | sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'sudo dd of=/etc/hosts'
-       cat ${OUTPUT_DIR}/kubeadm-join-config.yaml | sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'dd of=/root/kubeadm-join-config.yaml'
-       sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'kubeadm join --config /root/kubeadm-join-config.yaml'
+       #cat ${OUTPUT_DIR}/kubeadm-join-config.yaml | sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'dd of=/root/kubeadm-join-config.yaml'
+        sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" '/vagrant/join_worker.sh'
        echo
        echo
        echo "######### [DONE] ----> [BOOTSTRAP TASK Node Join] Joined K8S Cluster as ${WORKER} ###########"

@@ -78,7 +78,7 @@ mkdir /root/.kube 2>/dev/null
 cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
 echo "[TASK 6] Fix kube-apiserver IP in /etc/kubernetes/manifests/kube-apiserver.yaml file"
-sed -i "s/10.10.10.21/${MY_IP}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
+sed -i "s/${CONTROLLER1_IP}/${MY_IP}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
 echo " ... done"
 sleep 5
 kubectl get all --all-namespaces
