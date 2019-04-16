@@ -8,7 +8,8 @@ export OUTPUT_DIR=$(realpath -m /kube/_clusters/${K8S_CLUSTER_NAME})
 export LOCAL_CERTS_DIR=${OUTPUT_DIR}/pki
 export KUBECONFIG=${OUTPUT_DIR}/kubeconfig
 export MASTER_SSH_ADDR_1=root@10.10.10.21
-
+export BASE_DNS1=8.8.8.8
+export BASE_DNS2=1.1.1.1
 
 export tokenTTL=0 #never expire
 export docker_ver="ce-18.06.3.ce"
@@ -74,6 +75,17 @@ ${WHOST1} ${WKR1} node1
 ${WHOST2} ${WKR2} node2
 ${WHOST3} ${WKR3} node3
 "
+
+
+egrep -v '^#|^$|^nameserver' /etc/resolv.conf > /etc/resolv.conf_new
+
+for BASE_DNS in ${BASE_DNS1} ${BASE_DNS2}
+ do
+	echo "nameserver ${BASE_DNS}" >>/etc/resolv.conf_new
+done
+
+mv -f /etc/resolv.conf_new /etc/resolv.conf
+
 
 pub_net(){
 	echo "[FIX_NET public_net] setting gateway to public address ${public_gw}"
