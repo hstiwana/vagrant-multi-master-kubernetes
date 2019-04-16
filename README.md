@@ -60,17 +60,19 @@ Future Plans:-
 	d) Now we need to do the same for static pods (kube-apiserver, kube-controller-manager, kube-scheduler, kubelet) on other managers
 	e) etcd static pod needs to match version with 1st master in cluster
 
+		[root@kmaster2 ~]# yum update kubeadmin-1.14.1-0.x86_64 kubelet-1.14-1.0.x86_64
 		[root@kmaster2 ~]# sed -i 's/v1.13.2/1.14.1/g' /etc/kubernetes/manifests/kube-apiserver.yaml  
 		[root@kmaster2 ~]# sed -i 's/v1.13.2/1.14.1/g' /etc/kubernetes/manifests/kube-controller-manager.yaml 
 		[root@kmaster2 ~]# sed -i 's/v1.13.2/1.14.1/g' /etc/kubernetes/manifests/kube-scheduler.yaml  
 		[root@kmaster2 ~]# sed -i 's/3.2.24/3.3.10/g' /etc/kubernetes/manifests/etcd.yaml
 		
+		[root@kmaster3 ~]# yum update kubeadmin-1.14.1-0.x86_64 kubelet-1.14-1.0.x86_64
 		[root@kmaster3 ~]# sed -i 's/v1.13.2/1.14.1/g' /etc/kubernetes/manifests/kube-apiserver.yaml 
 		[root@kmaster3 ~]# sed -i 's/v1.13.2/1.14.1/g' /etc/kubernetes/manifests/kube-controller-manager.yaml 
 		[root@kmaster3 ~]# sed -i 's/v1.13.2/1.14.1/g' /etc/kubernetes/manifests/kube-scheduler.yaml  
 		[root@kmaster3 ~]# sed -i 's/3.2.24/3.3.10/g' /etc/kubernetes/manifests/etcd.yaml
 		
-	f) On each node, do the following (please cordon, uncordon nodes before doing it)
+	f) On each node, do the following (please cordon, drain nodes before doing it, don't forget to uncordon them)
 		
 		[root@nodeX ~]# yum -u update kubelet-1.14-1.0.x86_64
 		[root@nodeX ~]# kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2) 
