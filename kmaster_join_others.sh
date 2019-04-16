@@ -77,8 +77,13 @@ chown -R vagrant:vagrant /home/vagrant/.kube
 mkdir /root/.kube 2>/dev/null
 cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
-echo "[TASK 6] Fix kube-apiserver IP in /etc/kubernetes/manifests/kube-apiserver.yaml file"
+echo "[TASK 6] Fix kube-apiserver IP and ETCD cluster node IPs"
+export bad_ip=$(echo ${public_gw}|cut -d. -f1-3)
+export good_ip=$(echo ${private_gw}|cut -d. -f1-3)
+
 sed -i "s/${CONTROLLER1_IP}/${MY_IP}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
+sed -i "s/${bad_ip}/${good_ip}/g" /etc/kubernetes/manifests/etcd.yaml
 echo " ... done"
-sleep 5
+sleep 10
+
 kubectl get all --all-namespaces --kubeconfig=/etc/kubernetes/admin.conf
