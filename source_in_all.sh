@@ -7,7 +7,6 @@ export OUTPUT_DIR=$(realpath -m /kube/_clusters/${K8S_CLUSTER_NAME})
 export LOCAL_CERTS_DIR=${OUTPUT_DIR}/pki
 export KUBECONFIG=${OUTPUT_DIR}/kubeconfig
 export MASTER_SSH_ADDR_1=root@10.10.10.21
-export KUBEADM_TOKEN=$(kubeadm token generate)
 
 
 export tokenTTL=0 #never expire
