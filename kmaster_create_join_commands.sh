@@ -11,8 +11,9 @@ cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
 # Generate Cluster join command
 echo "[MASTER 1 TASK - FINAL] Generate and save cluster join command to /joincluster.sh"
-rm -rf /joincluster.sh > /dev/null 2>&1
-kubeadm token create --print-join-command --kubeconfig=${kubeconfig} > /joincluster.sh
+echo "source /vagrant/source_in_all.sh" > /joincluster.sh
+echo "pri_net" >>/joincluster.sh
+kubeadm token create --print-join-command --kubeconfig=${kubeconfig} >> /joincluster.sh
+echo "pub_net" >>/joincluster.sh
 
-master=$(cat /joincluster.sh)
-echo "${master} --experimental-control-plane ${kubeadminitopts}" >/joinMaster.sh
+sed 's/:6443/:6443 --experimental-control-plane/' /joincluster.sh >/joinMaster.sh
