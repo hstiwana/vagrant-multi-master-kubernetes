@@ -14,7 +14,6 @@ echo ${rootpwd} | passwd --stdin root >/dev/null 2>&1
 # Remove eth0 and setup gateway
 echo "[TASK 3] Update gateway to ${public_gw} for installations to work"
 #call pub_net function from sourced script
-pub_net
 yum -d0 -q -y install net-tools vim lsof
 
 # Update hosts file
@@ -130,7 +129,7 @@ route -A inet6 add default gw fc00::1 ${public_eth} > /dev/null 2>&1
 EOFL
 
 if [ ${MY_HOSTNAME} == ${LPLB} ];then
-pub_net
+#pub_net
 echo "[TASK 16] Install Nginx to configure as LB"
 cat >/etc/yum.repos.d/nginx.repo<<EOF
 [nginx]
