@@ -89,9 +89,3 @@ Vagrant CentOS based Multi-Master Kubernetes lab
 	
 
 # Bugs / issues:-
- kube-apiserver keeps crashing on other masters except very first one. seems like "endpoint-reconciler" is having some issue. it was addressed but somehow it is still hiting the same problem in our "base/inital release of 1.13.2"
-
-Add "- --endpoint-reconciler-type=none" in /etc/kubernetes/manifests/kube-apiserver.yaml. ref: https://github.com/kubernetes/kubernetes/pull/51698
-
-    		
-		- --endpoint-reconciler-type=none
