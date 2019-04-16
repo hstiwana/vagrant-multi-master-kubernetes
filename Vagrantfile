@@ -20,7 +20,7 @@ Vagrant.configure(2) do |config|
     kmaster.vm.box = "kub-base-centos76"
     kmaster.vm.synced_folder ".", "/vagrant", type: "virtualbox"
     kmaster.vm.hostname = "kmaster#{m}.#{DNS_Name}"
-    kmaster.vm.network "public_network", ip: "192.168.0.2#{m}"
+    kmaster.vm.network "public_network", ip: "192.168.0.2#{m}", bridge: "eth0"
     kmaster.vm.network "private_network", ip: "10.10.10.2#{m}",
     virtualbox__intnet: true
     kmaster.vm.provider "virtualbox" do |v|
@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
       workernode.vm.box = "kub-base-centos76"
       workernode.vm.synced_folder ".", "/vagrant", type: "virtualbox"
       workernode.vm.hostname = "node#{i}.#{DNS_Name}"
-      workernode.vm.network "public_network", ip: "192.168.0.4#{i}"
+      workernode.vm.network "public_network", ip: "192.168.0.4#{i}", bridge: "eth0"
       workernode.vm.network "private_network", ip: "10.10.10.4#{i}",
       virtualbox__intnet: true
       workernode.vm.provider "virtualbox" do |v|
@@ -64,7 +64,7 @@ Vagrant.configure(2) do |config|
     lb.vm.box = "kub-base-centos76"
     lb.vm.synced_folder ".", "/vagrant", type: "virtualbox"
     lb.vm.hostname = "lb.#{DNS_Name}"
-    lb.vm.network "public_network", ip: "192.168.0.10"
+    lb.vm.network "public_network", ip: "192.168.0.10", bridge: "eth0"
     lb.vm.network "private_network", ip: "10.10.10.10",
     virtualbox__intnet: true
     lb.vm.provider "virtualbox" do |v|
