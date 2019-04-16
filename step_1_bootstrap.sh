@@ -33,20 +33,20 @@ yes|yum install -d0 -y -q docker-${docker_ver}
 mkdir /etc/docker 2>/dev/null
 
 ### Setup daemon.
-#cat > /etc/docker/daemon.json <<EOF
-#{
-#  "exec-opts": ["native.cgroupdriver=systemd"],
-#  "log-driver": "json-file",
-#  "log-opts": {
-#    "max-size": "100m"
-#  },
-#  "storage-driver": "overlay2",
-#  "storage-opts": [
-#    "overlay2.override_kernel_check=true"
-#  ]
-#}
-#EOF
-#mkdir -p /etc/systemd/system/docker.service.d
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ]
+}
+EOF
+mkdir -p /etc/systemd/system/docker.service.d >/dev/null 2>&1
 
 # Enable docker service
 echo "[TASK 6] Enable and start docker service"
@@ -93,7 +93,7 @@ EOF
 # Install Kubernetes
 echo "[TASK 12] Install Kubernetes (kubeadm, kubelet and kubectl)"
 yum install -d0 -y -q kubeadm-${k8s_rpm_ver} kubelet-${k8s_rpm_ver} kubectl-${k8s_rpm_ver} kubernetes-cni-${cni_ver} 
-systemctl enable kubelet.service
+systemctl enable kubelet.service >/dev/null 2>&1
 
 # Update vagrant user's bashrc file
 echo "[TASK 13] Update /etc/bashrc file"
@@ -361,7 +361,7 @@ sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" '/vagrant/kmaster_c
 # 13 Ensure that it is running
 echo '[TASK 13. Ensure that it is running]'
 export KUBECONFIG=$OUTPUT_DIR/kubeconfig
-kubectl get pods --all-namespaces
+kubectl get pods --all-namespaces --kubeconfig=/etc/kubernetes/admin.conf
 
 # 14. Installing Pod Network
 echo '[TASK 14. Installing Pod Network]'
@@ -371,7 +371,7 @@ kubectl apply -f /vagrant/kube-flannel.yaml
 echo "CHECK: sleep 20"
 sleep 20
 echo "CHECK: kubectl get nodes"
-kubectl get nodes
+kubectl get nodes --kubeconfig=/etc/kubernetes/admin.conf
 
 # 15. Run kubeadm join on other master nodes
 echo '[TASK 15. Run kubeadm join on other master nodes]'
