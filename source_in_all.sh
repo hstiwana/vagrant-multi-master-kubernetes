@@ -1,4 +1,5 @@
 #!/bin/bash
+chmod +x /vagrant/*.sh
 export k8s_rpm_ver="1.13.2-0" # yum list --showduplicates kubeadm --disableexcludes=kubernetes #1.13.2-0
 export K8S_VERSION='1.13.2' #will use during intial cluster setup with /etc/kubernetes/pki/kubeadm-config-`hostname -f`.yaml
 export cni_ver="0.6.0"
@@ -7,7 +8,6 @@ export OUTPUT_DIR=$(realpath -m /kube/_clusters/${K8S_CLUSTER_NAME})
 export LOCAL_CERTS_DIR=${OUTPUT_DIR}/pki
 export KUBECONFIG=${OUTPUT_DIR}/kubeconfig
 export MASTER_SSH_ADDR_1=root@10.10.10.21
-export KUBEADM_TOKEN=$(kubeadm token generate)
 
 
 export tokenTTL=0 #never expire
