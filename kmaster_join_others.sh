@@ -83,6 +83,7 @@ export good_ip=$(echo ${private_gw}|cut -d. -f1-3)
 
 sed -i "s/${CONTROLLER1_IP}/${MY_IP}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
 sed -i "s/${bad_ip}/${good_ip}/g" /etc/kubernetes/manifests/etcd.yaml
+sed -i "s/${bad_ip}/${good_ip}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
 echo " ... done"
 sleep 10
 
