@@ -81,4 +81,4 @@ echo "[TASK 6] Fix kube-apiserver IP in /etc/kubernetes/manifests/kube-apiserver
 sed -i "s/${CONTROLLER1_IP}/${MY_IP}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
 echo " ... done"
 sleep 5
-kubectl get all --all-namespaces
+kubectl get all --all-namespaces --kubeconfig=/etc/kubernetes/admin.conf
