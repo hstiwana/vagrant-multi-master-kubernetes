@@ -27,6 +27,8 @@ Vagrant.configure(2) do |config|
       v.name = "kmaster#{m}"
       v.memory = 2048
       v.cpus = 2
+      v.customize ["modifyvm", :id, "--hwvirtex", "on"]
+      v.customize ["modifyvm", :id, "--audio", "none"]
       v.customize ["modifyvm", :id, "--nictype1", "virtio"]
       v.customize ["modifyvm", :id, "--nictype2", "virtio"]
       v.customize ["modifyvm", :id, "--nictype3", "virtio"]
@@ -48,6 +50,8 @@ Vagrant.configure(2) do |config|
         v.name = "node#{i}"
         v.memory = 4096
         v.cpus = 4
+        v.customize ["modifyvm", :id, "--hwvirtex", "on"]
+        v.customize ["modifyvm", :id, "--audio", "none"]
         v.customize ["modifyvm", :id, "--nictype1", "virtio"]
         v.customize ["modifyvm", :id, "--nictype2", "virtio"]
         v.customize ["modifyvm", :id, "--nictype3", "virtio"]
@@ -67,6 +71,8 @@ Vagrant.configure(2) do |config|
       v.name = "lb.lk8s.net"
       v.memory = 1048
       v.cpus = 1
+      v.customize ["modifyvm", :id, "--hwvirtex", "on"]
+      v.customize ["modifyvm", :id, "--audio", "none"]
       v.customize ["modifyvm", :id, "--nictype1", "virtio"]
       v.customize ["modifyvm", :id, "--nictype2", "virtio"]
       v.customize ["modifyvm", :id, "--nictype3", "virtio"]
