@@ -361,7 +361,7 @@ sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" '/vagrant/kmaster_c
 # 13 Ensure that it is running
 echo '[TASK 13. Ensure that it is running]'
 export KUBECONFIG=$OUTPUT_DIR/kubeconfig
-kubectl get pods --all-namespaces --kubeconfig=/etc/kubernetes/admin.conf
+kubectl get pods --all-namespaces
 
 # 14. Installing Pod Network
 echo '[TASK 14. Installing Pod Network]'
@@ -371,7 +371,7 @@ kubectl apply -f /vagrant/kube-flannel.yaml
 echo "CHECK: sleep 20"
 sleep 20
 echo "CHECK: kubectl get nodes"
-kubectl get nodes --kubeconfig=/etc/kubernetes/admin.conf
+kubectl get nodes 
 
 # 15. Run kubeadm join on other master nodes
 echo '[TASK 15. Run kubeadm join on other master nodes]'
