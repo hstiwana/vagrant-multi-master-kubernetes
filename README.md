@@ -1,7 +1,10 @@
 # vagrant-multi-master-kubernetes
 Vagrant CentOS based Multi-Master Kubernetes lab
 
-NOTE: Vagrant and VirtualBox are required to use this lab.
+# NOTE 1: Vagrant and VirtualBox are required to use this lab.
+# NOTE 2: Please update "Vagrantfile" and "source_in_all.sh" script with your network settings.
+# NOTE 2.1: Replace YOUR_PUBLIC_HOSTNAME and YOUR_PUBLIC_IP to enable kubectl to work remotely too.
+
 
 1) Clone this repo and cd into the directory
 
