@@ -169,6 +169,7 @@ systemctl restart nginx
 mkdir /kube
 # 1. kubeadm init config template
 echo '[TASK 1. kubeadm init config template]'
+export KUBEADM_TOKEN=$(kubeadm token generate)
 cat >/kube/kubeadm-init-config.tmpl.yaml <<EOF
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: InitConfiguration
