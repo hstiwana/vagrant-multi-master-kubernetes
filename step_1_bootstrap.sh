@@ -365,8 +365,9 @@ kubectl get pods --all-namespaces
 
 # 14. Installing Pod Network
 echo '[TASK 14. Installing Pod Network]'
-curl -s --output $OUTPUT_DIR/kube-flannel.yaml https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
-kubectl apply -f $OUTPUT_DIR/kube-flannel.yaml
+#curl -s --output $OUTPUT_DIR/kube-flannel.yaml https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+#kubectl apply -f $OUTPUT_DIR/kube-flannel.yaml
+kubectl apply -f /vagrant/kube-flannel.yaml
 echo "CHECK: sleep 20"
 sleep 20
 echo "CHECK: kubectl get nodes"
