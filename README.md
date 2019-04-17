@@ -54,7 +54,7 @@ we are creating a separate volume of 100G to store our VM images.
 
 4) Add newly generated image "kub-base-centos76" in your vagrant "box"
 		
-   	vagrant box add kub-base-centos76 --name kub-base-centos76
+     	vagrant box add kub-base-centos76 --name kub-base-centos76
 
 5) Now we are ready to build our lab with 3 masters and 3 nodes
 		
