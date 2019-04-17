@@ -40,8 +40,7 @@ we are creating a separate volume of 100G to store our VM images.
 
 1) Clone this repo and cd into the directory
 
-    	git clone  https://github.com/hstiwana/vagrant-multi-master-kubernetes.git && \
-   	cd vagrant-multi-master-kubernetes
+    	git clone  https://github.com/hstiwana/vagrant-multi-master-kubernetes.git && cd vagrant-multi-master-kubernetes
 
 2) Build base image first (it will help to speed up VM boot because it will install "Virtualbox Guest Additions")
 
