@@ -5,10 +5,13 @@ Vagrant CentOS based Multi-Master Kubernetes lab
 # NOTE 2: Please update "Vagrantfile" and "source_in_all.sh" script with your network settings.
 # NOTE 2.1: Replace YOUR_PUBLIC_HOSTNAME and YOUR_PUBLIC_IP to enable kubectl to work remotely too.
 
-# ========START underlying Hardware / VM config ========
+=====================================================================
+# === START underlying Hardware / VM config ====
 # Tools for unerlying hardware configuration (versions e.t.c.)
 
-Following was done on a RHEL 7.4 running physical server and it is known to work. (we are creating a seprate volume of 100G to store our VM images)
+Following was done on a RHEL 7.4 running physical server and it is known to work.
+we are creating a separate volume of 100G to store our VM images.
+
 
 	lvcreate -L +100G -n kubernetes vg00
 	mkfs.ext4 /dev/mapper/vg00-kubernetes
@@ -28,7 +31,8 @@ Following was done on a RHEL 7.4 running physical server and it is known to work
 	mkdir "/kubernetes/VirtualBoxVMs/" 2>/dev/null
 	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
 	sed -i '/swap/d' /etc/fstab; swapoff -a
-# ======== END underlying Hardware / VM config ========
+# ==== END underlying Hardware / VM config ====
+=====================================================================
 
 
 
