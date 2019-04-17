@@ -9,7 +9,7 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 ### ================================================================
 ## ====== START underlying Hardware / VM config ======
-## Tools for unerlying hardware configuration (versions e.t.c.)
+### Tools for unerlying hardware configuration (versions e.t.c.)
 
 Following was done on a RHEL 7.4 running physical server and it is known to work.
 we are creating a separate volume of 100G to store our VM images.
@@ -33,6 +33,7 @@ we are creating a separate volume of 100G to store our VM images.
 	mkdir "/kubernetes/VirtualBoxVMs/" 2>/dev/null
 	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
 	sed -i '/swap/d' /etc/fstab; swapoff -a
+	
 ## ====== END underlying Hardware / VM config ======
 ### ================================================================
 
