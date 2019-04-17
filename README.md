@@ -7,7 +7,7 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 
 
-### ===================================================================
+### ================================================================
 ## ====== START underlying Hardware / VM config ======
 ## Tools for unerlying hardware configuration (versions e.t.c.)
 
@@ -34,8 +34,7 @@ we are creating a separate volume of 100G to store our VM images.
 	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
 	sed -i '/swap/d' /etc/fstab; swapoff -a
 ## ====== END underlying Hardware / VM config ======
-### ===================================================================
-
+### ================================================================
 
 
 
