@@ -8,7 +8,7 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 
 ### ================================================================
-## ====== START underlying Hardware / VM config ======
+## ====== START underlying Hardware / (Hypervisor) VM config ======
 ### Tools for unerlying hardware configuration (versions e.t.c.)
 
 Following was done on a RHEL 7.4 running physical server and it is known to work.
@@ -24,7 +24,7 @@ we are creating a separate volume of 100G to store our VM images.
 	vagrant plugin install vagrant-vbguest
 	yum -d0 -q -y install kernel-devel kernel-headers make patch gcc git xauth
 	wget -q https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo -P /etc/yum.repos.d
-	yes|yum -d0 -q -y  install VirtualBox-6.0.x86_64
+	yes|yum -d0 -q -y  install VirtualBox-6.0-6.0.4_128413_el7-1.x86_64
 	systemctl enable --now vboxdrv; systemctl status vboxdrv
 	wget -q https://download.virtualbox.org/virtualbox/6.0.4/Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
 	yes|VBoxManage extpack install  Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
@@ -34,7 +34,7 @@ we are creating a separate volume of 100G to store our VM images.
 	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
 	sed -i '/swap/d' /etc/fstab; swapoff -a
 	
-## ====== END underlying Hardware / VM config ======
+## ====== END underlying Hardware / (Hypervisor) VM config ======
 ### ================================================================
 
 
