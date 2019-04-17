@@ -3,13 +3,13 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 # NOTE 1: Vagrant and VirtualBox are required to use this lab.
 # NOTE 2: Please update "Vagrantfile" and "source_in_all.sh" script with your network settings.
-# NOTE 2.1: Replace YOUR_PUBLIC_HOSTNAME and YOUR_PUBLIC_IP to enable kubectl to work remotely too.
+## NOTE 2.1: Replace YOUR_PUBLIC_HOSTNAME and YOUR_PUBLIC_IP to enable kubectl to work remotely too.
 
 
 
 =====================================================================
-# ==== START underlying Hardware / VM config ====
-# Tools for unerlying hardware configuration (versions e.t.c.)
+## ==== START underlying Hardware / VM config ====
+## Tools for unerlying hardware configuration (versions e.t.c.)
 
 Following was done on a RHEL 7.4 running physical server and it is known to work.
 we are creating a separate volume of 100G to store our VM images.
@@ -33,7 +33,7 @@ we are creating a separate volume of 100G to store our VM images.
 	mkdir "/kubernetes/VirtualBoxVMs/" 2>/dev/null
 	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
 	sed -i '/swap/d' /etc/fstab; swapoff -a
-# ==== END underlying Hardware / VM config ====
+## ==== END underlying Hardware / VM config ====
 =====================================================================
 
 
