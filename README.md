@@ -1,5 +1,5 @@
-# vagrant-multi-master-kubernetes
-Vagrant CentOS based Multi-Master Kubernetes lab
+# vagrant-multi-master-kubernetes [HA]
+Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 # NOTE 1: Vagrant and VirtualBox are required to use this lab.
 # NOTE 2: Please update "Vagrantfile" and "source_in_all.sh" script with your network settings.
