@@ -122,3 +122,4 @@ we are creating a separate volume of 100G to store our VM images.
 
 
 # Bugs / issues:-
+1. This setup will configure only 1 LB machine, to get "100%" HA, please configure another LB VM and use something like "keepalived" to host your main LB VIP IP. - will be added in this guide soon.
