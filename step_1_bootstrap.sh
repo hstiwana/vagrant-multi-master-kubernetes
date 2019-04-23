@@ -105,52 +105,12 @@ if [ $(grep kubectl /etc/bashrc|wc -l) != 1 ]; then
 	echo "Entry Found"; 
 fi
 
-echo "[TASK 14] create script /etc/setMyGateway to ensure correct routes are always present even after reboots"
-cat >/etc/setMyGateway<<EOFL
-#!/bin/bash
-# Remove eth0 and setup gateway
-route -n | awk '{ if (\$8 == "$private_eth" && \$2 != "0.0.0.0") print "route del default gw " \$2; }'|bash -s
-route delete default gw ${private_gw} > /dev/null 2>&1
-route add default gw ${public_gw} > /dev/null 2>&1
-route -A inet6 add default gw fc00::1 ${public_eth} > /dev/null 2>&1
-# Always print exit code 0 otherwise systemd service setMyGateway.service fails to start
-exit 0
-EOFL
-chmod +x /etc/setMyGateway
-
-cat >/etc/systemd/system/setMyGateway.service<<EOF
-[Unit]
-Description=/etc/setMyGateway to set public interface
-ConditionFileIsExecutable=/etc/setMyGateway
-[Service]
-ExecStart=/etc/setMyGateway
-RemainAfterExit=yes
-[Install]
-WantedBy=multi-user.target
-After=network-online.target
-Wants=network-online.target
+echo "[TASK 14] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
+cat >/etc/sysconfig/network<<EOF
+NETWORKING=yes|no
+GATEWAY=${public_gw}
+GATEWAYDEV=${public_eth}
 EOF
-
-systemctl daemon-reload &&  systemctl enable --now setMyGateway.service
-
-#cleanup any old mess in /etc/rc.d/rc.local
-cp -p /etc/rc.d/rc.local /etc/rc.d/rc.local_`date +%F_%k_%M`.back
-chmod -x /etc/rc.d/rc.local
-cat >/etc/rc.local<<EOFL
-#!/bin/bash
-# THIS FILE IS ADDED FOR COMPATIBILITY PURPOSES
-#
-# It is highly advisable to create own systemd services or udev rules
-# to run scripts during boot instead of using this file.
-#
-# In contrast to previous versions due to parallel execution during boot
-# this script will NOT be run after all other services.
-#
-# Please note that you must run 'chmod +x /etc/rc.d/rc.local' to ensure
-# that this script will be executed during boot.
-
-touch /var/lock/subsys/local
-EOFL
 
 if [ ${MY_HOSTNAME} == ${LPLB} ];then
 pub_net
