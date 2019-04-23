@@ -107,7 +107,7 @@ fi
 
 echo "[TASK 14] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
 cat >/etc/sysconfig/network<<EOF
-NETWORKING=yes|no
+NETWORKING=yes
 GATEWAY=${public_gw}
 GATEWAYDEV=${public_eth}
 EOF
