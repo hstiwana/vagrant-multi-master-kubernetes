@@ -109,7 +109,7 @@ echo "[TASK 14] create script /etc/setMyGateway to ensure correct routes are alw
 cat >/etc/setMyGateway<<EOFL
 #!/bin/bash
 # Remove eth0 and setup gateway
-route -n | awk '{ if (\$8 == "$public_eth" && \$2 != "0.0.0.0") print "route del default gw " \$2; }'|bash -s
+route -n | awk '{ if (\$8 == "$private_eth" && \$2 != "0.0.0.0") print "route del default gw " \$2; }'|bash -s
 route delete default gw ${private_gw} > /dev/null 2>&1
 route add default gw ${public_gw} > /dev/null 2>&1
 route -A inet6 add default gw fc00::1 ${public_eth} > /dev/null 2>&1
@@ -127,9 +127,8 @@ ExecStart=/etc/setMyGateway
 RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
-Wants=network-online.target
 After=network-online.target
-After=network.service
+Wants=network-online.target
 EOF
 
 systemctl daemon-reload &&  systemctl enable --now setMyGateway.service
