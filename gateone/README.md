@@ -1,5 +1,9 @@
 ## Deploy "GateOne" in your kubernetes cluster from docker image
 1) untar file from "gateone" directory
+     ```
+     untar xzf gateone.tar.gz
+     cd gateone
+     ```
 2) build your container from Dockerfile
       ```
       docker build -t gateone .
