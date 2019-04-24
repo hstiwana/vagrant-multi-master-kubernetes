@@ -70,5 +70,10 @@ spec:
   type: ClusterIP
 status:
   loadBalancer: {}
-````
-     
+```
+Once your service edit is done, you can see **EXTERNAL-IP** listed in your service status.
+```
+kmaster1# kubectl get service gateone
+NAME      TYPE        CLUSTER-IP       EXTERNAL-IP                              PORT(S)   AGE
+gateone   ClusterIP   10.100.144.252   192.168.0.41,192.168.0.42,192.168.0.43   443/TCP   37m
+```
