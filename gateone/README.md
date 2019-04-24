@@ -31,8 +31,7 @@
 8) If all looks good on all 3 nodes, stop your "gateone" process runining on your nodes and prepare your deployment.
    **--image-pull-policy Never**  is the key here that makes a local image work with k8s.
       ```
-      kubectl run gateone --image gateone --image-pull-policy Never --dry-run -o yaml --port 10443 \ 
-      --expose --hostport 443 --command -- /GateOne/run_gateone.py |sed 's/port: 10443/port: 443/1' >/tmp/gateone.yaml
+      kubectl run gateone --image gateone --image-pull-policy Never --dry-run -o yaml --port 10443 --expose --hostport 443 --command -- /GateOne/run_gateone.py |sed 's/port: 10443/port: 443/1' >/tmp/gateone.yaml
       kubectl create -f /tmp/gateone.yaml
       ```
 9) Scale your deployment to run one pod on each node.
