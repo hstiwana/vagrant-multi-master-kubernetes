@@ -38,3 +38,33 @@
      ```
      kubectl scale deployment gateone --replicas 3
      ```
+10) If you want to make your service available from your external network, edit your service and add **externalIPs** section to it.
+      ```
+      kubectl edit service gateone
+     ``` 
+It should look something like this. Make sure to use your **NodeX** IP details e.g. I am using 192.168.0.4X here.
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: gateone
+  selfLink: /api/v1/namespaces/default/services/gateone
+spec:
+  externalIPs:
+  - 192.168.0.41
+  - 192.168.0.42
+  - 192.168.0.43
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 10443
+  selector:
+    run: gateone
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+````
+     
