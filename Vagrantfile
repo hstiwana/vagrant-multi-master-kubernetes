@@ -3,11 +3,17 @@
 
 ENV['VAGRANT_NO_PARALLEL'] = 'yes'
 Vagrant.configure(2) do |config|
-  #
-  #Install vagrant-scp and vagrant-vbguest plugins
+ #
+ #Install vagrant-scp and vagrant-vbguest plugins
  config.vagrant.plugins = ["vagrant-scp", "vagrant-vbguest"]
-  # Common provisioning code for all VMs
- # config.vm.provision "shell", path: "bootstrap.sh"
+ # Common provisioning code for all VMs
+  
+ # IP address of your LAN's router e.g. 192.168.0.1
+ default_router = "192.168.0.1"
+ # change/ensure the default route via the local network's WAN router, useful for public_network/bridged mode
+ config.vm.provision :shell, run: "always", :inline => "ip route delete default >/dev/null 2>&1 || true; ip route add default via #{default_router} >/dev/null 2>&1"
+
+ # config.vm.provision "shell", path: "step_1_bootstrap.sh"
  config.vm.provision "shell", path: "step_1_bootstrap.sh"
   
  DNS_Name = "lk8s.net"
@@ -28,6 +34,8 @@ Vagrant.configure(2) do |config|
       v.memory = 2048
       v.cpus = 2
       v.customize ["modifyvm", :id, "--hwvirtex", "on"]
+      v.customize ["modifyvm", :id, "--nested-hw-virt","on"]
+      v.customize ["modifyvm", :id, "--cpuhotplug","on"]
       v.customize ["modifyvm", :id, "--audio", "none"]
       v.customize ["modifyvm", :id, "--nictype1", "virtio"]
       v.customize ["modifyvm", :id, "--nictype2", "virtio"]
@@ -36,28 +44,30 @@ Vagrant.configure(2) do |config|
   end
  end
 
-  NodeCount = 3
- # Add 3 Kubernetes Worker Nodes
-  (1..NodeCount).each do |i|
-    config.vm.define "node#{i}" do |workernode|
-      workernode.vm.box = "kub-base-centos76"
-      workernode.vm.synced_folder ".", "/vagrant", type: "virtualbox"
-      workernode.vm.hostname = "node#{i}.#{DNS_Name}"
-      workernode.vm.network "public_network", ip: "192.168.0.4#{i}", bridge: "eth0"
-      workernode.vm.network "private_network", ip: "10.10.10.4#{i}",
-      virtualbox__intnet: true
-      workernode.vm.provider "virtualbox" do |v|
-        v.name = "node#{i}"
-        v.memory = 4096
-        v.cpus = 4
-        v.customize ["modifyvm", :id, "--hwvirtex", "on"]
-        v.customize ["modifyvm", :id, "--audio", "none"]
-        v.customize ["modifyvm", :id, "--nictype1", "virtio"]
-        v.customize ["modifyvm", :id, "--nictype2", "virtio"]
-        v.customize ["modifyvm", :id, "--nictype3", "virtio"]
-      end
+NodeCount = 3
+# Add 3 Kubernetes Worker Nodes
+(1..NodeCount).each do |i|
+  config.vm.define "node#{i}" do |workernode|
+    workernode.vm.box = "kub-base-centos76"
+    workernode.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+    workernode.vm.hostname = "node#{i}.#{DNS_Name}"
+    workernode.vm.network "public_network", ip: "192.168.0.4#{i}", bridge: "eth0"
+    workernode.vm.network "private_network", ip: "10.10.10.4#{i}",
+    virtualbox__intnet: true
+    workernode.vm.provider "virtualbox" do |v|
+      v.name = "node#{i}"
+      v.memory = 4096
+      v.cpus = 4
+      v.customize ["modifyvm", :id, "--hwvirtex", "on"]
+      v.customize ["modifyvm", :id, "--nested-hw-virt","on"]
+      v.customize ["modifyvm", :id, "--cpuhotplug","on"]
+      v.customize ["modifyvm", :id, "--audio", "none"]
+      v.customize ["modifyvm", :id, "--nictype1", "virtio"]
+      v.customize ["modifyvm", :id, "--nictype2", "virtio"]
+      v.customize ["modifyvm", :id, "--nictype3", "virtio"]
     end
   end
+end
 
  # Nginx LB Node
   config.vm.define "lb" do |lb|
@@ -72,6 +82,8 @@ Vagrant.configure(2) do |config|
       v.memory = 1048
       v.cpus = 1
       v.customize ["modifyvm", :id, "--hwvirtex", "on"]
+      v.customize ["modifyvm", :id, "--nested-hw-virt","on"]
+      v.customize ["modifyvm", :id, "--cpuhotplug","on"]
       v.customize ["modifyvm", :id, "--audio", "none"]
       v.customize ["modifyvm", :id, "--nictype1", "virtio"]
       v.customize ["modifyvm", :id, "--nictype2", "virtio"]
