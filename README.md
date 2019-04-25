@@ -14,36 +14,37 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 Following was done on a RHEL 7.4 running physical server and it is known to work.
 we are creating a separate volume of 100G to store our VM images.
 
+```
+lvcreate -L +100G -n kubernetes vg00
+mkfs.ext4 /dev/mapper/vg00-kubernetes
+mkdir /kubernetes 2>/dev/null
+if [ $(grep /kubernetes /etc/fstab|wc -l) != 1 ]; then echo "/dev/mapper/vg00-kubernetes /kubernetes                ext4    defaults        1 2" >> /etc/fstab; else echo "fstab Entry Found"; fi
+mount /kubernetes && cd /kubernetes
+yes|yum -d0 -q -y install https://releases.hashicorp.com/vagrant/2.2.4/vagrant_2.2.4_x86_64.rpm
+vagrant plugin install vagrant-vbguest
+yum -d0 -q -y install kernel-devel kernel-headers make patch gcc git xauth
+wget -q https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo -P /etc/yum.repos.d
+yes|yum -d0 -q -y  install VirtualBox-6.0-6.0.4_128413_el7-1.x86_64
+systemctl enable --now vboxdrv; systemctl status vboxdrv
+wget -q https://download.virtualbox.org/virtualbox/6.0.4/Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
+yes|VBoxManage extpack install  Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
+rm -rf Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
+rm -rf ~/VirtualBox\ VMs
+mkdir "/kubernetes/VirtualBoxVMs/" 2>/dev/null
+ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
+sed -i '/swap/d' /etc/fstab; swapoff -a
+cat >/etc/modprobe.d/kvm-nested.conf<<EOF
+options kvm-intel nested=1
+options kvm-intel enable_shadow_vmcs=1
+options kvm-intel enable_apicv=1
+options kvm-intel ept=1
+EOF
+modprobe -r kvm_intel
+modprobe -a kvm_intel
+# check status if kvm_intel is supported
+# cat /sys/module/kvm_intel/parameters/nested
+```
 
-	lvcreate -L +100G -n kubernetes vg00
-	mkfs.ext4 /dev/mapper/vg00-kubernetes
-	mkdir /kubernetes 2>/dev/null
-	if [ $(grep /kubernetes /etc/fstab|wc -l) != 1 ]; then echo "/dev/mapper/vg00-kubernetes /kubernetes                ext4    defaults        1 2" >> /etc/fstab; else echo "fstab Entry Found"; fi
-	mount /kubernetes && cd /kubernetes
-	yes|yum -d0 -q -y install https://releases.hashicorp.com/vagrant/2.2.4/vagrant_2.2.4_x86_64.rpm
-	vagrant plugin install vagrant-vbguest
-	yum -d0 -q -y install kernel-devel kernel-headers make patch gcc git xauth
-	wget -q https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo -P /etc/yum.repos.d
-	yes|yum -d0 -q -y  install VirtualBox-6.0-6.0.4_128413_el7-1.x86_64
-	systemctl enable --now vboxdrv; systemctl status vboxdrv
-	wget -q https://download.virtualbox.org/virtualbox/6.0.4/Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
-	yes|VBoxManage extpack install  Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
-	rm -rf Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack
-	rm -rf ~/VirtualBox\ VMs
-	mkdir "/kubernetes/VirtualBoxVMs/" 2>/dev/null
-	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
-	sed -i '/swap/d' /etc/fstab; swapoff -a
-	cat >/etc/modprobe.d/kvm-nested.conf<<EOF
-	options kvm-intel nested=1
-        options kvm-intel enable_shadow_vmcs=1
-        options kvm-intel enable_apicv=1
-        options kvm-intel ept=1
-	EOF
-	modprobe -r kvm_intel
-	modprobe -a kvm_intel
-	# check status if kvm_intel is supported
-	# cat /sys/module/kvm_intel/parameters/nested
-	
 ## ====== END underlying Hypervisor (Hardware / VM) config ======
 ### ================================================================
 
