@@ -33,6 +33,16 @@ we are creating a separate volume of 100G to store our VM images.
 	mkdir "/kubernetes/VirtualBoxVMs/" 2>/dev/null
 	ln -s /kubernetes/VirtualBoxVMs/ ~/VirtualBox\ VMs
 	sed -i '/swap/d' /etc/fstab; swapoff -a
+	cat >/etc/modprobe.d/kvm-nested.conf<<EOF
+	options kvm-intel nested=1
+        options kvm-intel enable_shadow_vmcs=1
+        options kvm-intel enable_apicv=1
+        options kvm-intel ept=1
+	EOF
+	modprobe -r kvm_intel
+	modprobe -a kvm_intel
+	# check status if kvm_intel is supported
+	# cat /sys/module/kvm_intel/parameters/nested
 	
 ## ====== END underlying Hypervisor (Hardware / VM) config ======
 ### ================================================================
