@@ -116,7 +116,7 @@ fi
 if [ ${MY_HOSTNAME} == ${LPLB} ];then
 echo "[TASK 15 LB ] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
 # Call pub_net function to set gateway to public interface on LB machine.
-pub_net
+# pub_net
 # Create file to ensure network is good even after reboots.
 cat >/etc/sysconfig/network<<EOF
 NETWORKING=yes
