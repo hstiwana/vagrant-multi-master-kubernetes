@@ -91,7 +91,13 @@ mv -f /etc/resolv.conf_new /etc/resolv.conf
 pub_net(){
 	echo "[FIX_NET public_net] setting gateway to public address ${public_gw}"
 	#delete virtualbox route for first interface used as NAT
-	eval `route -n | awk "{ if (\$8 == \"$nat_eth\" && \$2 != \"0.0.0.0\") print \"route del default gw \" \$2; }"` 2>/dev/null
+	nat_route=$(ip route |grep ${nat_eth}|grep default)
+        if [ "${nat_route}" != ""  ]; then
+                delroute="ip route delete $(ip route |grep ${nat_eth}|grep default)"
+                echo  $delroute|sudo bash  > /dev/null 2>&1
+        else
+                echo "N/A"  > /dev/null 2>&1
+        fi
 	route delete default gw ${private_gw} > /dev/null 2>&1
 
 	route add default gw ${public_gw} > /dev/null 2>&1
@@ -113,7 +119,13 @@ pri_net(){
 	echo "[FIX_NET private_net] setting gateway to private address ${private_gw}"
 	route delete default gw ${public_gw} > /dev/null 2>&1
 	route -A inet6 delete default gw fc00::1 ${public_eth} > /dev/null 2>&1
-        eval `route -n | awk "{ if (\$8 == \"$nat_eth\" && \$2 != \"0.0.0.0\") print \"route del default gw \" \$2; }"` 2>/dev/null
+	nat_route=$(ip route |grep ${nat_eth}|grep default)
+        if [ "${nat_route}" != ""  ]; then
+                delroute="ip route delete $(ip route |grep ${nat_eth}|grep default)"
+                echo  $delroute|sudo bash  > /dev/null 2>&1
+        else
+                echo "N/A"  > /dev/null 2>&1
+        fi
 
 	route add default gw ${private_gw} > /dev/null 2>&1
 	route -A inet6 add default gw fc00::1 ${private_eth} > /dev/null 2>&1
