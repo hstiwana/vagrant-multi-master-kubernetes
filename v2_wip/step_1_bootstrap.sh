@@ -5,7 +5,7 @@ source /vagrant/source_in_all.sh
 echo "[TASK 1] Enable ssh password authentication"
 sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl reload sshd
-systemctl disable --now NetworkManager.service NetworkManager-wait-online.service
+systemctl disable --now NetworkManager.service NetworkManager-wait-online.service >/dev/null 2>&1
 
 # Set Root password
 echo "[TASK 2] Set root password"
