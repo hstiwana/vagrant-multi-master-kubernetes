@@ -404,15 +404,18 @@ stream {
 
 }
 EOF
+sed "s/$K8S_API_ENDPOINT/$PLBIP/g'  ${OUTPUT_DIR}/kubeconfig > ${OUTPUT_DIR}/${K8S_CLUSTER_NAME}_kubeadmin.conf"
 systemctl restart nginx.service
 
 echo "ETCD Cluster status ... "
    etcd_statusv3
 echo
 echo
-echo "========== Install done, copy admin kubeconfig file to your machine using following command ========="
-echo '=== Find root password from "source_in_all.sh" script ==='
-echo "scp  root@${PLBIP}:${OUTPUT_DIR}/kubeconfig ~/${K8S_CLUSTER_NAME}_kubeadmin.conf"
-echo "=== set environment variable \"KUBECONFIG=~/${K8S_CLUSTER_NAME}_kubeadmin.conf\" ==="
-fi 
-#END of MY_HOSTNAME LPLB IF Statement
+echo "========== Install done, copy admin kubeconfig file to your machine using following command =========="
+echo '========== Find root password from "source_in_all.sh" script =========='
+echo
+echo "scp  root@${PLBIP}:${OUTPUT_DIR}/${K8S_CLUSTER_NAME}_kubeadmin.conf ~/${K8S_CLUSTER_NAME}_kubeadmin.conf"
+echo
+echo "=== set environment variable \"export KUBECONFIG=~/${K8S_CLUSTER_NAME}_kubeadmin.conf\" ==="
+
+fi #END of MY_HOSTNAME LPLB IF Statement
