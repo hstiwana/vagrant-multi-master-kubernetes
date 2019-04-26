@@ -141,4 +141,4 @@ until echo ${state} | grep -m 1 "cluster is healthy"; do
 done
 }
 # version check using ETCDCTL_API 3
-#docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.2.24 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl  --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --cacert=/etc/kubernetes/pki/etcd/ca.crt --endpoints https://10.10.10.21:2379,https://10.10.10.22:2379,https://10.10.10.23:2379 --write-out="table" endpoint status"
+# docker run -e CONTROLLER1_IP=${CONTROLLER1_IP} -e CONTROLLER2_IP=${CONTROLLER2_IP} -e CONTROLLER3_IP=${CONTROLLER3_IP}--rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.2.24 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl  --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --cacert=/etc/kubernetes/pki/etcd/ca.crt --endpoints https://${CONTROLLER1_IP}:2379,https://${CONTROLLER2_IP}:2379,https://${CONTROLLER3_IP}:2379 --write-out="table" endpoint status"
