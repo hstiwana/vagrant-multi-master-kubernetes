@@ -101,7 +101,9 @@ pub_net(){
 
 nat_net(){
 	echo "[FIX_NET public_NAT_net] setting gateway to NAT address ${nat_gw}"
-	#add back virtualbox route for first interface used as NAT
+        route delete default gw ${public_gw} > /dev/null 2>&1
+	route delete default gw ${private_gw} > /dev/null 2>&1
+        #add back virtualbox route for first interface used as NAT
 	route add default gw ${nat_gw} > /dev/null 2>&1
 	route -A inet6 add default gw fc00::1 ${nat_eth} > /dev/null 2>&1
 	echo '.... done'
@@ -112,7 +114,6 @@ pri_net(){
 	route delete default gw ${public_gw} > /dev/null 2>&1
 	route -A inet6 delete default gw fc00::1 ${public_eth} > /dev/null 2>&1
 	eval `route -n | awk '{ if ($8 == "eth0" && $2 != "0.0.0.0") print "route del default gw " $2; }'` 2>/dev/null
-	route delete default gw ${private_gw} > /dev/null 2>&1
 
 	route add default gw ${private_gw} > /dev/null 2>&1
 	route -A inet6 add default gw fc00::1 ${private_eth} > /dev/null 2>&1
