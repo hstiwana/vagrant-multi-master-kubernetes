@@ -67,9 +67,9 @@ vagrant package --output kub-base-centos76
 vagrant box add kub-base-centos76 --name kub-base-centos76
 ```
 5) Now we are ready to build our lab with 3 masters and 3 nodes and 1 LB
-   Note: you need to edit your #"Vagrantfile"# and #"source_in_all.sh"#
+   Note: you need to edit your **"Vagrantfile"** and **"source_in_all.sh"**
 ```
-cd ../ && vagrant validate && vagrant up
+cd ../v2_wip && vagrant validate && vagrant up
 ```
 
 # Future Plans / Cluster Upgrades :-
