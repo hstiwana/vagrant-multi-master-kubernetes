@@ -133,4 +133,7 @@ node3.lk8s.net      Ready    <none>   24h   v1.14.1
 # Bugs / Issues / Improvements / Future enhancements :-
 1. This setup will configure only 1 LB machine, to get "100%" HA, please configure another LB VM and use something like "keepalived" to host your main LB VIP IP. - will be added in this guide soon.
 
-2. Can be improved and secured e.g. remove all the "public" IPs from this setup and have just LB node talk to the world. That way we don't end up using too many external IPs (from your home or office network space).
+### Don't want to use too many IPs from your home network or company's network? use build from "v2_wip" and share feedback.
+This looks more improved and secured setup e.g. we remove all the "public" IPs from this setup and have just LB node talk to the world. That way we don't end up using too many external IPs (from your home or office network space).
+
+~~ Need to expose a service to external IP? use your "LB"'s public IP with --external-ip command.~~
