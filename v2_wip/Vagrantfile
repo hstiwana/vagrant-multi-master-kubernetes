@@ -65,9 +65,9 @@ end
     lb.vm.box = "kub-base-centos76"
     lb.vm.synced_folder ".", "/vagrant", type: "virtualbox"
     lb.vm.hostname = "lb.#{DNS_Name}"
-    lb.vm.network "public_network", ip: "192.168.0.10", bridge: "eth0"
     lb.vm.network "private_network", ip: "10.10.10.10",
     virtualbox__intnet: true
+    lb.vm.network "public_network", ip: "192.168.0.10", bridge: "eth0"
     lb.vm.provider "virtualbox" do |v|
       v.name = "lb.lk8s.net"
       v.memory = 1048
