@@ -405,6 +405,11 @@ stream {
 }
 EOF
 systemctl restart nginx.service
+
+echo "ETCD Cluster status ... "
+   etcd_statusv3
+echo
+echo
 echo "========== Install done, copy admin kubeconfig file to your machine using following command ========="
 echo '=== Find root password from "source_in_all.sh" script ==='
 echo "scp  root@${PLBIP}:${OUTPUT_DIR}/kubeconfig ~/${K8S_CLUSTER_NAME}_kubeadmin.conf"
