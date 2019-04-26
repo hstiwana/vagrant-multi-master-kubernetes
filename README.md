@@ -134,3 +134,5 @@ modprobe -a kvm_intel
 
 # Bugs / issues:-
 1. This setup will configure only 1 LB machine, to get "100%" HA, please configure another LB VM and use something like "keepalived" to host your main LB VIP IP. - will be added in this guide soon.
+
+2. Can be improved and secured e.g. remove all the "public" IPs from this setup and have just LB node talk to the world. That way we don't end up using too many external IPs (from your home or office network space).
