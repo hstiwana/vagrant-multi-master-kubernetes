@@ -18,9 +18,9 @@ export private_gw=10.10.10.1
 export nat_gw=10.0.2.2
 export LOCAL_CERTS_DIR=/etc/kubernetes/pki
 
-export public_eth=eth1
 export nat_eth=eth0
-export private_eth=eth2
+export private_eth=eth1
+export public_eth=eth2
 
 # SSH password and Options
 export rootpwd=kubeadmin
@@ -113,7 +113,7 @@ pri_net(){
 	echo "[FIX_NET private_net] setting gateway to private address ${private_gw}"
 	route delete default gw ${public_gw} > /dev/null 2>&1
 	route -A inet6 delete default gw fc00::1 ${public_eth} > /dev/null 2>&1
-	eval `route -n | awk '{ if ($8 == "eth0" && $2 != "0.0.0.0") print "route del default gw " $2; }'` 2>/dev/null
+        eval `route -n | awk "{ if (\$8 == \"$nat_eth\" && \$2 != \"0.0.0.0\") print \"route del default gw \" \$2; }"` 2>/dev/null
 
 	route add default gw ${private_gw} > /dev/null 2>&1
 	route -A inet6 add default gw fc00::1 ${private_eth} > /dev/null 2>&1
