@@ -404,7 +404,7 @@ stream {
 
 }
 EOF
-sed "s/$K8S_API_ENDPOINT/$PLBIP/g'  ${OUTPUT_DIR}/kubeconfig > ${OUTPUT_DIR}/${K8S_CLUSTER_NAME}_kubeadmin.conf"
+sed "s/$K8S_API_ENDPOINT/$PLBIP/g"  ${OUTPUT_DIR}/kubeconfig > ${OUTPUT_DIR}/${K8S_CLUSTER_NAME}_kubeadmin.conf
 systemctl restart nginx.service
 
 echo "ETCD Cluster status ... "
