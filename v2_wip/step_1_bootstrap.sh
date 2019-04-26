@@ -12,7 +12,7 @@ echo "[TASK 2] Set root password"
 echo ${rootpwd} | passwd --stdin root >/dev/null 2>&1
 
 # Remove eth0 and setup gateway
-echo "[TASK 3] Update gateway to ${public_gw} for installations to work"
+echo "[TASK 3] install net-tools vim lsof tools"
 #call pub_net function from sourced script
 yum -d0 -q -y install net-tools vim lsof
 #pub_net
