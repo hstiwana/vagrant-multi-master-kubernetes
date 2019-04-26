@@ -13,9 +13,10 @@ echo ${rootpwd} | passwd --stdin root >/dev/null 2>&1
 
 # Remove eth0 and setup gateway
 echo "[TASK 3] install net-tools vim lsof tools"
-#call pub_net function from sourced script
+#call nat_net function from sourced script
+nat_net
 yum -d0 -q -y install net-tools vim lsof
-#pub_net
+
 
 # Update hosts file
 echo "[TASK 4] Update /etc/hosts file"
@@ -114,6 +115,9 @@ fi
 
 if [ ${MY_HOSTNAME} == ${LPLB} ];then
 echo "[TASK 15 LB ] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
+# Call pub_net function to set gateway to public interface on LB machine.
+pub_net
+# Create file to ensure network is good even after reboots.
 cat >/etc/sysconfig/network<<EOF
 NETWORKING=yes
 GATEWAY=${public_gw}
