@@ -7,7 +7,6 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 
 
-### ================================================================
 ## ====== START underlying Hypervisor (Hardware / VM) config ======
 ### Tools for your Hypervisor configuration (versions e.t.c.)
 
@@ -46,7 +45,6 @@ modprobe -a kvm_intel
 ```
 
 ## ====== END underlying Hypervisor (Hardware / VM) config ======
-### ================================================================
 
 
 
