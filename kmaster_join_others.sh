@@ -35,49 +35,20 @@ sshpass -p ${rootpwd} scp ${opts} ${CONTROLLER1_IP}:/joinMaster.sh /joinMaster.s
 bash /joinMaster.sh
 rm /joinMaster.sh
 
-echo "[TASK 4] Setting up a Kube API healthz probe via NGINX"
-cat >/etc/yum.repos.d/nginx.repo<<EOF
-[nginx]
-name=nginx repo
-baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
-gpgcheck=0
-enabled=1
-EOF
-
-yes|yum -d0 -q -y install nginx
-
-cat > /etc/nginx/conf.d/kubernetes.default.svc.cluster.local.conf << EOF
-server {
-  listen      80;
-  server_name kubernetes.default.svc.cluster.local;
-
-  location /healthz {
-     proxy_pass                    https://${MY_IP}:6443/healthz;
-     proxy_ssl_trusted_certificate /etc/kubernetes/pki/ca.crt;
-  }
-}
-EOF
-
-systemctl enable --now nginx
-systemctl restart nginx
-
-echo
-curl -H "Host: kubernetes.default.svc.cluster.local" http://127.0.0.1/healthz;echo; echo
-
 # Remove eth0 and setup gateway to our public network ${public_gw}/24
 # This is needed for internet connectivity to work
 # echo "[TASK 7] remove gateway to ${private_gw}"
 # pub_net
 
 # Copy Kube admin config
-echo "[TASK 5] Copy kube admin config to Vagrant user .kube directory"
+echo "[TASK 4] Copy kube admin config to Vagrant user .kube directory"
 mkdir /home/vagrant/.kube 2>/dev/null
 cp -f /etc/kubernetes/admin.conf /home/vagrant/.kube/config
 chown -R vagrant:vagrant /home/vagrant/.kube
 mkdir /root/.kube 2>/dev/null
 cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
-echo "[TASK 6] Fix kube-apiserver IP and ETCD cluster node IPs"
+echo "[TASK 5] Fix kube-apiserver IP and ETCD cluster node IPs"
 export bad_ip=$(echo ${public_gw}|cut -d. -f1-3)
 export good_ip=$(echo ${private_gw}|cut -d. -f1-3)
 

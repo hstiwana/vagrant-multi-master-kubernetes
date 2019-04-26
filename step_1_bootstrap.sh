@@ -335,7 +335,6 @@ echo '[TASK 11. Copy kubeadm config file to the master]'
 sed '/certificatesDir:/d' ${OUTPUT_DIR}/kubeadm-init-config.yaml | sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" 'sudo dd of=/root/kubeadm-init-config.yaml'
 
 # 12. Run kubeadm init without certs phase
-sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" '/vagrant/kmaster_nginx.sh'
 echo '[TASK 12. Run kubeadm init without certs phase]'
 sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" "kubeadm init --skip-phases certs ${kubeadminitopts} --config /root/kubeadm-init-config.yaml |tee -a kubeadm-init.logs"
 sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" '/vagrant/kmaster_create_join_commands.sh'
@@ -382,9 +381,9 @@ done
 cat >/etc/nginx/tcpconf.d/kubernetes.conf<<EOF
 stream {
     upstream kubernetes {
-        server $CONTROLLER1_IP:6443;
-        server $CONTROLLER2_IP:6443;
-        server $CONTROLLER3_IP:6443;
+        server $CONTROLLER1_IP:6443 max_fails=3 fail_timeout=30s;
+        server $CONTROLLER2_IP:6443 max_fails=3 fail_timeout=30s;
+        server $CONTROLLER3_IP:6443 max_fails=3 fail_timeout=30s;
     }
 
     server {
