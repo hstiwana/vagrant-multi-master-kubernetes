@@ -28,7 +28,7 @@ EOF
 echo "[TASK 5] Install docker container engine and sshpass"
 yum install -d0 -y -q wget curl sshpass yum-utils device-mapper-persistent-data lvm2 
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo 
-yes|yum install -d0 -y -q docker-${docker_ver} 
+yes|yum install -d0 -y -q docker-${docker_ver} >/dev/null 2>&1
 
 #### Create /etc/docker directory.
 mkdir /etc/docker 2>/dev/null
@@ -93,7 +93,7 @@ EOF
 
 # Install Kubernetes
 echo "[TASK 12] Install Kubernetes (kubeadm, kubelet and kubectl)"
-yum install -d0 -y -q kubeadm-${k8s_rpm_ver} kubelet-${k8s_rpm_ver} kubectl-${k8s_rpm_ver} kubernetes-cni-${cni_ver} 
+yum install -d0 -y -q kubeadm-${k8s_rpm_ver} kubelet-${k8s_rpm_ver} kubectl-${k8s_rpm_ver} kubernetes-cni-${cni_ver} >/dev/null 2>&1
 systemctl enable kubelet.service >/dev/null 2>&1
 
 # Update vagrant user's bashrc file
@@ -134,7 +134,7 @@ enabled=1
 EOF
 
 # Install Nginx
-yes|yum -d0 -q -y install nginx
+yes|yum -d0 -q -y install nginx >/dev/null 2>&1
 echo "[TASK 17] Setting up a Kube API Frontend Load Balancer with NGINX"
 mkdir -p /etc/nginx/tcpconf.d
 if [ $(grep tcpconf.d /etc/nginx/nginx.conf|wc -l) != 1 ]; then
