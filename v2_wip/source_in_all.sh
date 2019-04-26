@@ -58,7 +58,7 @@ export serviceSubnet="10.96.0.0/12"
 export podSubnet="10.244.0.0/16"
 export ETCDHOSTS=(${CONTROLLER1_IP} ${CONTROLLER2_IP} ${CONTROLLER3_IP})
 export NAMES=(${MST1} ${MST2} ${MST3})
-export MY_IP=$(ip a show dev eth2|grep -w inet|awk -F/ '{print $1}'|awk '{print $2}')
+export MY_IP=$(ip a show dev ${private_eth}|grep -w inet|awk -F/ '{print $1}'|awk '{print $2}')
 export MY_HOSTNAME=$(hostname -f)
 
 export CP0_HOSTNAME=${MST1}
