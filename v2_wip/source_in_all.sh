@@ -16,6 +16,7 @@ export docker_ver="ce-18.06.3.ce"
 export public_gw=192.168.0.1
 export private_gw=10.10.10.1
 export nat_gw=10.0.2.2
+export nat_ip=10.0.2.15/24
 export LOCAL_CERTS_DIR=/etc/kubernetes/pki
 
 export nat_eth=eth0
@@ -110,6 +111,9 @@ nat_net(){
         route delete default gw ${public_gw} > /dev/null 2>&1
 	route delete default gw ${private_gw} > /dev/null 2>&1
         #add back virtualbox route for first interface used as NAT
+	ip addr add ${nat_ip} dev ${nat_eth} 2>&1
+	ip route add default via ${nat_gw} > /dev/null 2>&1
+        #next line is duplicate, but i prefer to keep it
 	route add default gw ${nat_gw} > /dev/null 2>&1
 	route -A inet6 add default gw fc00::1 ${nat_eth} > /dev/null 2>&1
 	echo '.... done'
