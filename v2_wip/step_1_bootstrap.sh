@@ -106,12 +106,12 @@ if [ $(grep kubectl /etc/bashrc|wc -l) != 1 ]; then
 	echo "Entry Found"; 
 fi
 
-#echo "[TASK 14] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
-#cat >/etc/sysconfig/network<<EOF
-#NETWORKING=yes
-#GATEWAY=${private_gw}
-#GATEWAYDEV=${private_eth}
-#EOF
+echo "[TASK 14] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
+cat >/etc/sysconfig/network<<EOF
+NETWORKING=yes
+GATEWAY=${nat_gw}
+GATEWAYDEV=${nat_eth}
+EOF
 
 if [ ${MY_HOSTNAME} == ${LPLB} ];then
 echo "[TASK 15 LB ] update /etc/sysconfig/network to ensure correct routes are always present even after reboots"
