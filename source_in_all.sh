@@ -1,8 +1,8 @@
 #!/bin/bash
 chmod +x /vagrant/*.sh
-export k8s_rpm_ver="1.13.2-0" # yum list --showduplicates kubeadm --disableexcludes=kubernetes #1.13.2-0
-export K8S_VERSION='1.13.2' #will use during intial cluster setup with /etc/kubernetes/pki/kubeadm-config-`hostname -f`.yaml
-export cni_ver="0.6.0"
+export k8s_rpm_ver="1.14.1-0" # yum list --showduplicates kubeadm --disableexcludes=kubernetes #1.13.2-0
+export K8S_VERSION='1.14.1' #will use during intial cluster setup with /etc/kubernetes/pki/kubeadm-config-`hostname -f`.yaml
+export cni_ver="0.7.5-0"
 export K8S_CLUSTER_NAME=lk8s.net
 export OUTPUT_DIR=$(realpath -m /kube/_clusters/${K8S_CLUSTER_NAME})
 export LOCAL_CERTS_DIR=${OUTPUT_DIR}/pki
