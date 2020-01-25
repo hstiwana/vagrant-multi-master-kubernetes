@@ -98,7 +98,7 @@ cd ../ && vagrant validate && vagrant up
 ```
 3) Wait for few minutes and let static pods to restart with new changes, now install new version of "kubelet"
 ```
-[root@kmaster1 ~]# yum -u update kubelet-1.14-1.0.x86_64
+[root@kmaster1 ~]# yum -y update kubelet-1.14-1.0.x86_64
 [root@kmaster1 ~]# kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
 [root@kmaster1 ~]# systemctl daemon-reload && system restart kubelet
 ```
@@ -116,7 +116,7 @@ cd ../ && vagrant validate && vagrant up
 ```		
 [root@nodeX ~]# yum -u update kubelet-1.14-1.0.x86_64
 [root@nodeX ~]# kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2) 
-[root@nodeX ~]# systemctl daemon-reload && system restart kubelet
+[root@nodeX ~]# systemctl daemon-reload && systemctl restart kubelet
 ```   
 7) Check your node versions with kubectl get nodes.
 ```   
