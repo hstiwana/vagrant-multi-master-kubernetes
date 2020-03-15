@@ -1,7 +1,7 @@
 #!/bin/bash
 chmod +x /vagrant/*.sh
-export k8s_rpm_ver="1.14.1-0" # yum list --showduplicates kubeadm --disableexcludes=kubernetes #1.13.2-0
-export K8S_VERSION='1.14.1' #will use during intial cluster setup with /etc/kubernetes/pki/kubeadm-config-`hostname -f`.yaml
+export k8s_rpm_ver="1.17.0-0" # yum list --showduplicates kubeadm --disableexcludes=kubernetes #1.13.2-0
+export K8S_VERSION='1.17.1' #will use during intial cluster setup with /etc/kubernetes/pki/kubeadm-config-`hostname -f`.yaml
 export cni_ver="0.7.5-0"
 export K8S_CLUSTER_NAME=lk8s.net
 export OUTPUT_DIR=$(realpath -m /kube/_clusters/${K8S_CLUSTER_NAME})
@@ -12,7 +12,7 @@ export BASE_DNS1=8.8.8.8
 export BASE_DNS2=1.1.1.1
 
 export tokenTTL=0 #never expire
-export docker_ver="ce-18.06.3.ce"
+export docker_ver="ce-19.03.8"
 export public_gw=192.168.0.1
 export private_gw=10.10.10.1
 export LOCAL_CERTS_DIR=/etc/kubernetes/pki
@@ -110,11 +110,11 @@ pri_net(){
 
 etcd_status(){
 echo "Checking cluster state to ensure ETCD cluster is up before starting K8s HA config"
-until echo ${state} | grep -m 1 "cluster is healthy"; do
-    state=$(docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.2.24 etcdctl --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --ca-file /etc/kubernetes/pki/etcd/ca.crt --endpoints https://${MY_IP}:2379 cluster-health|tail -1);
+until echo ${state} | grep -m 1 "is healthy"; do
+    state=$(docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.4.3-0 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl  --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --cacert=/etc/kubernetes/pki/etcd/ca.crt --endpoints https://${MY_IP}:2379 endpoint health");
     sleep 5;
     echo "ETCD : ${state}";
 done
 }
 # version check using ETCDCTL_API 3
-#docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.2.24 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl  --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --cacert=/etc/kubernetes/pki/etcd/ca.crt --endpoints https://10.10.10.21:2379,https://10.10.10.22:2379,https://10.10.10.23:2379 --write-out="table" endpoint status"
+#docker run --rm -i --net host -v /etc/kubernetes:/etc/kubernetes k8s.gcr.io/etcd:3.4.3-0 /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl  --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --cacert=/etc/kubernetes/pki/etcd/ca.crt --endpoints https://10.10.10.21:2379,https://10.10.10.22:2379,https://10.10.10.23:2379 --write-out="table" endpoint status"

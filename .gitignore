@@ -1,2 +1,3 @@
 **/.vagrant
 **/buildbase/kub-base-centos76
+KUBECONFIG

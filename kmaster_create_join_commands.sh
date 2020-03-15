@@ -13,7 +13,8 @@ cp -f /etc/kubernetes/admin.conf /root/.kube/config
 echo "[MASTER 1 TASK - FINAL] Generate and save cluster join command to /joincluster.sh"
 echo "source /vagrant/source_in_all.sh" > /joincluster.sh
 echo "pri_net" >>/joincluster.sh
-kubeadm token create --print-join-command --kubeconfig=${kubeconfig} >> /joincluster.sh
+kubeadm token create --print-join-command --kubeconfig=${kubeconfig} >> /joincluster.sh 2>/dev/null
 echo "pub_net" >>/joincluster.sh
 
-sed 's/:6443/:6443 --experimental-control-plane/' /joincluster.sh >/joinMaster.sh
+sed 's/:6443/:6443 --control-plane --ignore-preflight-errors=all /' /joincluster.sh >/joinMaster.sh
+sed 's/.$/ 2>\/dev\/null/g' /joinMaster.sh

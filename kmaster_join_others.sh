@@ -11,7 +11,7 @@ EOF
 systemctl enable kubelet.service
 # Download required images first
 echo "[TASK 1 - PRE-Flight-TASK] kubeadm config images pull"
-kubeadm config images pull --kubernetes-version ${K8S_VERSION}
+kubeadm config images pull --kubernetes-version ${K8S_VERSION} 2>/dev/null
 
 echo "[TASK 2] Copy Kubernetes Cluster config and certs from ${CONTROLLER1_IP} [Master1]"
 mkdir -p /etc/kubernetes/pki/etcd 2>/dev/null

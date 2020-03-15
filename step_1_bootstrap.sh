@@ -155,7 +155,7 @@ mkdir /kube
 echo '[TASK 1. kubeadm init config template]'
 export KUBEADM_TOKEN=$(kubeadm token generate)
 cat >/kube/kubeadm-init-config.tmpl.yaml <<EOF
-apiVersion: kubeadm.k8s.io/v1beta1
+apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
 bootstrapTokens:
 - token: "${KUBEADM_TOKEN}"
@@ -165,7 +165,7 @@ localAPIEndpoint:
   advertiseAddress: ${K8S_API_ADDVERTISE_IP_1}
   bindPort: 6443
 ---
-apiVersion: kubeadm.k8s.io/v1beta1
+apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 kubernetesVersion: v${K8S_VERSION}
 clusterName: ${K8S_CLUSTER_NAME}
@@ -220,14 +220,15 @@ envsubst < /kube/kubeadm-init-config.tmpl.yaml > ${OUTPUT_DIR}/kubeadm-init-conf
 
 # 6. Generate Certificates
 echo '[TASK 5. Generate Certificates]'
-kubeadm init phase certs all --config ${OUTPUT_DIR}/kubeadm-init-config.yaml
+kubeadm init phase certs all --config ${OUTPUT_DIR}/kubeadm-init-config.yaml 2>/dev/null
+kubeadm init phase upload-certs --upload-certs --config ${OUTPUT_DIR}/kubeadm-init-config.yaml 2>/dev/null
 
 # 2. kubeadm join template
 echo '[TASK 6. kubeadm join template]'
 export CA_CERT_HASH=$(openssl x509 -pubkey -in ${LOCAL_CERTS_DIR}/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* /sha256:/')
 
 cat >/kube/kubeadm-join-config.tmpl.yaml<<EOF
-apiVersion: kubeadm.k8s.io/v1beta1
+apiVersion: kubeadm.k8s.io/v1beta2
 kind: JoinConfiguration
 nodeRegistration:
   kubeletExtraArgs:
@@ -336,14 +337,17 @@ sed '/certificatesDir:/d' ${OUTPUT_DIR}/kubeadm-init-config.yaml | sshpass -p ${
 
 # 12. Run kubeadm init without certs phase
 echo '[TASK 12. Run kubeadm init without certs phase]'
-sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" "kubeadm init --skip-phases certs ${kubeadminitopts} --config /root/kubeadm-init-config.yaml |tee -a kubeadm-init.logs"
+sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" "kubeadm init --skip-phases certs ${kubeadminitopts} --config /root/kubeadm-init-config.yaml |tee -a kubeadm-init.logs 2>/dev/null"
 sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" '/vagrant/kmaster_create_join_commands.sh'
 
  
 # 13 Ensure that it is running
 echo '[TASK 13. Ensure that it is running]'
 export KUBECONFIG=$OUTPUT_DIR/kubeconfig
+cp -pf $KUBECONFIG /vagrant/KUBECONFIG 2>/dev/null
+sed -i 's/server: https:\/\/lb.lk8s.net:6443/server: https:\/\/192.168.0.10:6443/g' /vagrant/KUBECONFIG
 kubectl get pods --all-namespaces
+
 
 # 14. Installing Pod Network
 echo '[TASK 14. Installing Pod Network]'
@@ -397,3 +401,8 @@ EOF
 systemctl restart nginx.service
 fi 
 #END of MY_HOSTNAME LPLB IF Statement
+echo "###############################################################################################################"
+echo "#
+echo "# Please set KUBECONFIG to $(pwd)/KUBECONFIG to run commands from local host"
+echo "#
+echo "###############################################################################################################"

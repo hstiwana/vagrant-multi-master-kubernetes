@@ -58,13 +58,13 @@ cd vagrant-multi-master-kubernetes
 ```
 cd buildbase && vagrant up
 ```
-3) Package this VM with name "kub-base-centos76", this will be used to build our Kubernetes VMs
+3) Package this VM with name "kub-base-centos77", this will be used to build our Kubernetes VMs
 ```	
-vagrant package --output kub-base-centos76
+vagrant package --output kub-base-centos77
 ```
-4) Add newly generated image "kub-base-centos76" in your vagrant "box"
+4) Add newly generated image "kub-base-centos77" in your vagrant "box"
 ```
-vagrant box add kub-base-centos76 --name kub-base-centos76
+vagrant box add kub-base-centos77 --name kub-base-centos77
 ```
 5) Now we are ready to build our lab with 3 masters and 3 nodes
 ```

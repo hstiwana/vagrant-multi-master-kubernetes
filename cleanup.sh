@@ -11,6 +11,9 @@ ip link set flannel.1 down 2>/dev/null; ip link del flannel.1 2>/dev/null;
 head -3 /etc/hosts >/etc/hosts_new
 cp -f /etc/hosts_new /etc/hosts
 rm -rf .kube/config /ktmp 2>/dev/null
+rm -f /joincluster.sh 2>/dev/null
+rm -rf /kube 2>/dev/null
+rm -rf /etc/kubernetes 2>/dev/null
 systemctl daemon-reload
 systemctl start kubelet
 systemctl restart docker
