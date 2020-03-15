@@ -90,7 +90,7 @@ cd ../ && vagrant validate && vagrant up
 [root@kmaster1 ~]# sed -i 's/v1.17.0/1.17.1/g' /etc/kubernetes/manifests/kube-scheduler.yaml  
 
 [root@kmaster1 ~]# grep -i  k8s.gcr.io /etc/kubernetes/manifests/*.yaml
-/etc/kubernetes/manifests/etcd.yaml:    image: k8s.gcr.io/etcd:3.3.10
+/etc/kubernetes/manifests/etcd.yaml:    image: k8s.gcr.io/etcd:3.4.3-0
 /etc/kubernetes/manifests/kube-apiserver.yaml:    image: k8s.gcr.io/kube-apiserver:v1.17.1
 /etc/kubernetes/manifests/kube-controller-manager.yaml:    image: k8s.gcr.io/kube-controller-manager:v1.17.1
 /etc/kubernetes/manifests/kube-scheduler.yaml:    image: k8s.gcr.io/kube-scheduler:v1.17.1
@@ -110,7 +110,7 @@ cd ../ && vagrant validate && vagrant up
 [root@kmasterX ~]# sed -i 's/v1.17.0/1.17.1/g' /etc/kubernetes/manifests/kube-apiserver.yaml  
 [root@kmasterX ~]# sed -i 's/v1.17.0/1.17.1/g' /etc/kubernetes/manifests/kube-controller-manager.yaml 
 [root@kmasterX ~]# sed -i 's/v1.17.0/1.17.1/g' /etc/kubernetes/manifests/kube-scheduler.yaml  
-[root@kmasterX ~]# sed -i 's/3.2.24/3.3.10/g' /etc/kubernetes/manifests/etcd.yaml
+[root@kmasterX ~]# sed -i 's/3.2.24/3.4.3-0/g' /etc/kubernetes/manifests/etcd.yaml
 ```
 6) On each node, do the following (please "cordon", "drain" nodes before doing it, don't forget to "uncordon" them)
 ```		
