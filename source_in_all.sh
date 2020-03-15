@@ -16,6 +16,7 @@ export docker_ver="ce-19.03.8"
 export public_gw=192.168.0.1
 export private_gw=10.10.10.1
 export LOCAL_CERTS_DIR=/etc/kubernetes/pki
+export ETC_K8S_ETCD=${LOCAL_CERTS_DIR}/etcd
 
 export public_eth=eth1
 export nat_eth=eth0

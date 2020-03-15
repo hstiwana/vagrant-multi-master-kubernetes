@@ -13,7 +13,7 @@ pub_net
 # Join worker nodes to the Kubernetes cluster
 echo "[TASK 2] Join node to Kubernetes Cluster"
 systemctl enable kubelet.service
-sshpass -p ${rootpwd} scp ${opts} ${CONTROLLER1_IP}:/joincluster.sh /joincluster.sh
+sshpass -p ${rootpwd} scp ${opts} ${CONTROLLER1_IP}:/joincluster.sh /joincluster.sh 2>/dev/null
 pri_net
 bash /joincluster.sh 
 rm /joincluster.sh

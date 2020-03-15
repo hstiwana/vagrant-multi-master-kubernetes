@@ -5,7 +5,7 @@ source /vagrant/source_in_all.sh
 echo "[TASK 1] Enable ssh password authentication"
 sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl reload sshd
-systemctl disable --now NetworkManager.service NetworkManager-wait-online.service
+systemctl disable --now NetworkManager.service NetworkManager-wait-online.service >/dev/null 2>&1
 
 # Set Root password
 echo "[TASK 2] Set root password"
@@ -27,7 +27,7 @@ EOF
 echo "[TASK 5] Install docker container engine and sshpass"
 yum install -d0 -y -q wget curl sshpass yum-utils device-mapper-persistent-data lvm2 
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo 
-yes|yum install -d0 -y -q docker-${docker_ver} 
+yes|yum install -d0 -y -q docker-${docker_ver} >/dev/null 2>&1
 
 #### Create /etc/docker directory.
 mkdir /etc/docker 2>/dev/null
@@ -92,7 +92,7 @@ EOF
 
 # Install Kubernetes
 echo "[TASK 12] Install Kubernetes (kubeadm, kubelet and kubectl)"
-yum install -d0 -y -q kubeadm-${k8s_rpm_ver} kubelet-${k8s_rpm_ver} kubectl-${k8s_rpm_ver} kubernetes-cni-${cni_ver} 
+yum install -d0 -y -q kubeadm-${k8s_rpm_ver} kubelet-${k8s_rpm_ver} kubectl-${k8s_rpm_ver} kubernetes-cni-${cni_ver} >/dev/null 2>&1
 systemctl enable kubelet.service >/dev/null 2>&1
 
 # Update vagrant user's bashrc file
@@ -124,7 +124,7 @@ enabled=1
 EOF
 
 # Install Nginx
-yes|yum -d0 -q -y install nginx
+yes|yum -d0 -q -y install nginx >/dev/null 2>&1
 echo "[TASK 17] Setting up a Kube API Frontend Load Balancer with NGINX"
 mkdir -p /etc/nginx/tcpconf.d
 if [ $(grep tcpconf.d /etc/nginx/nginx.conf|wc -l) != 1 ]; then
@@ -148,7 +148,7 @@ stream {
 }
 EOF
 
-systemctl enable --now nginx
+systemctl enable --now nginx >/dev/null 2>&1
 systemctl restart nginx
 mkdir /kube
 # 1. kubeadm init config template
@@ -188,6 +188,7 @@ apiServer:
     max-mutating-requests-inflight: "500"        
     default-watch-cache-size: "500"
     watch-cache-sizes: "persistentvolumeclaims#1000,persistentvolumes#1000"
+    encryption-provider-config: ${ETC_K8S_ETCD}/etcd_encryption_config.yaml
 
 controllerManager:
   # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/
@@ -243,6 +244,22 @@ discovery:
 EOF
 envsubst < /kube/kubeadm-join-config.tmpl.yaml > ${OUTPUT_DIR}/kubeadm-join-config.yaml
 
+export ENCODED_SECRET=$(head -c 32 /dev/urandom | base64)
+cat >/kube/etcd_encryption_config.yaml <<EOF
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  - resources:
+    - secrets
+    providers:
+    - aescbc:
+        keys:
+        - name: key1
+          secret: ${ENCODED_SECRET}
+    - identity: {}
+EOF
+envsubst < /kube/etcd_encryption_config.yaml > ${ETC_K8S_ETCD}/etcd_encryption_config.yaml
+
 # 7. Generate CA Certificate Hash
 echo '[TASK 7. Generate CA Certificate Hash]'
 export CERTS_DIR=${1:-$LOCAL_CERTS_DIR}
@@ -271,17 +288,17 @@ export CLIENT_CERT_EXTENSION=${CERTS_DIR}/cert-extension
 
 echo "OPENSSL = $OPENSSL "
 echo "Creating Client KEY $CLIENT_KEY "
-$OPENSSL genrsa -out "$CLIENT_KEY" 2048
+$OPENSSL genrsa -out "$CLIENT_KEY" 2048 2>/dev/null
 
 echo "Creating Client CSR $CLIENT_CSR "
-$OPENSSL req -subj "${CLIENT_SUBJECT}" -sha256 -new -key "${CLIENT_KEY}" -out "${CLIENT_CSR}"
+$OPENSSL req -subj "${CLIENT_SUBJECT}" -sha256 -new -key "${CLIENT_KEY}" -out "${CLIENT_CSR}" 2>/dev/null
 
 echo "--- create  ca extfile"
 echo "extendedKeyUsage=clientAuth" > "$CLIENT_CERT_EXTENSION"
 
 echo "--- sign  certificate ${CLIENT_CERT} "
 $OPENSSL x509 -req -days 1096 -sha256 -in "$CLIENT_CSR" -CA "$CA" -CAkey "$CA_KEY" \
--CAcreateserial -out "$CLIENT_CERT" -extfile "$CLIENT_CERT_EXTENSION" -passin pass:"$CA_PASS"
+-CAcreateserial -out "$CLIENT_CERT" -extfile "$CLIENT_CERT_EXTENSION" -passin pass:"$CA_PASS" 2>/dev/null
 
 # 8. Generate kubeconfig for accessing cluster by public k8s endpoint
 echo '[TASK 8. Generate kubeconfig for accessing cluster by public k8s endpoint]'
@@ -328,12 +345,12 @@ echo '[TASK 9. Install prerequisites on master]'
 # 10. Copy certificates to the master
 echo '[10. Copy certificates to the master]'
 
-cat /etc/hosts | sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" 'sudo dd of=/etc/hosts'
+cat /etc/hosts | sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" 'sudo dd of=/etc/hosts 2>/dev/null'
 tar -cz --directory=${LOCAL_CERTS_DIR} . | sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" 'sudo mkdir -p /etc/kubernetes/pki; sudo tar -xz --directory=/etc/kubernetes/pki/'
 
 # 11. Copy kubeadm config file to the master
 echo '[TASK 11. Copy kubeadm config file to the master]'
-sed '/certificatesDir:/d' ${OUTPUT_DIR}/kubeadm-init-config.yaml | sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" 'sudo dd of=/root/kubeadm-init-config.yaml'
+sed '/certificatesDir:/d' ${OUTPUT_DIR}/kubeadm-init-config.yaml | sshpass -p ${rootpwd} ssh ${opts} -qt "${MASTER_SSH_ADDR_1}" 'sudo dd of=/root/kubeadm-init-config.yaml 2>/dev/null'
 
 # 12. Run kubeadm init without certs phase
 echo '[TASK 12. Run kubeadm init without certs phase]'
@@ -346,6 +363,7 @@ echo '[TASK 13. Ensure that it is running]'
 export KUBECONFIG=$OUTPUT_DIR/kubeconfig
 cp -pf $KUBECONFIG /vagrant/KUBECONFIG 2>/dev/null
 sed -i 's/server: https:\/\/lb.lk8s.net:6443/server: https:\/\/192.168.0.10:6443/g' /vagrant/KUBECONFIG
+export KUBECONFIG=/vagrant/KUBECONFIG
 kubectl get pods --all-namespaces
 
 
@@ -373,9 +391,9 @@ done
 for WORKER in ${WKR1} ${WKR2} ${WKR3}
 do
        echo "[BOOTSTRAP TASK Node Join] Joining ${WORKER} in K8s Cluster"
-       cat /etc/hosts | sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'sudo dd of=/etc/hosts'
+       cat /etc/hosts | sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'sudo dd of=/etc/hosts 2>/dev/null'
        #cat ${OUTPUT_DIR}/kubeadm-join-config.yaml | sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" 'dd of=/root/kubeadm-join-config.yaml'
-        sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" '/vagrant/join_worker.sh'
+        sshpass -p ${rootpwd} ssh ${opts} -qt "${WORKER}" '/vagrant/join_worker.sh 2>/dev/null'
        echo
        echo
        echo "######### [DONE] ----> [BOOTSTRAP TASK Node Join] Joined K8S Cluster as ${WORKER} ###########"
@@ -399,10 +417,10 @@ stream {
 }
 EOF
 systemctl restart nginx.service
-fi 
-#END of MY_HOSTNAME LPLB IF Statement
 echo "###############################################################################################################"
 echo "#
 echo "# Please set KUBECONFIG to $(pwd)/KUBECONFIG to run commands from local host"
 echo "#
 echo "###############################################################################################################"
+fi 
+#END of MY_HOSTNAME LPLB IF Statement

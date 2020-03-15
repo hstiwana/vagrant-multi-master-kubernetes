@@ -21,7 +21,7 @@ do
 	sshpass -p ${rootpwd} scp  ${opts} -qpr ${CONTROLLER1_IP}:/etc/kubernetes/pki/${pkiFiles} /etc/kubernetes/pki/ 2>/dev/null
 done
 
-for etcdFiles in ca.crt ca.key
+for etcdFiles in ca.crt ca.key etcd_encryption_config.yaml
 do
 	sshpass -p ${rootpwd} scp  ${opts} -qpr ${CONTROLLER1_IP}:/etc/kubernetes/pki/etcd/${etcdFiles} /etc/kubernetes/pki/etcd/ 2>/dev/null
 done
