@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypod-nfs-pv
+  restartPolicy: "Never"
+  volumes:
+    - name: mypod-nfs-pv
+      persistentVolumeClaim:
+        claimName: nfs-pvc

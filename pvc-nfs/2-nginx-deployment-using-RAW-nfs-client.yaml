@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+          - mountPath: "/usr/share/nginx/html"
+            name: nfs-mount
+        resources: {}
+      volumes:
+        - name: nfs-mount
+          nfs:
+            server: 10.10.10.21
+            path: /exports/data-0001
+status: {}

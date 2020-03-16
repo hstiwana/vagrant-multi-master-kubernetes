@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nfs-client-busybox
+spec:
+spec:
+  selector:
+    matchLabels:
+      app: nfs-client-busybox
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nfs-client-busybox
+    spec:
+      containers:
+        - command:
+          - sleep
+          - "3600"
+          name: nfs-client-busybox
+          image: busybox
+          volumeMounts:
+            - name: nfs-mount
+              mountPath: /my-nfs-vol-mount-path
+          env:
+            - name: NFS_SERVER
+              value: 10.10.10.21
+            - name: NFS_PATH
+              value: /exports/data-0001
+      volumes:
+        - name: nfs-mount
+          nfs:
+            server: 10.10.10.21
+            path: /exports/data-0001
