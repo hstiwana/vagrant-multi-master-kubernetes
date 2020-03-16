@@ -1,4 +1,4 @@
-# setup NFS server on KMASTER1 node 
+# Setup NFS server on KMASTER1 node 
 ### In real production, we skip this part and rely on some enterprise grade NFS servers e.g. netApp. 
 
 #### ### login to kmaster1 (10.10.10.21)###
