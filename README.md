@@ -47,7 +47,7 @@ modprobe -a kvm_intel
 ## ====== END underlying Hypervisor (Hardware / VM) config ======
 
 
-
+##########Following works anywhere as long as you have vagrant + VirtualBox + git installed on system###########
 1) Clone this repo and cd into the directory
 ```
 git clone  https://github.com/hstiwana/vagrant-multi-master-kubernetes.git
