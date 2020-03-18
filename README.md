@@ -4,7 +4,7 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 # NOTE 1: Vagrant and VirtualBox are required to use this lab.
 ## NOTE 2: Please update "Vagrantfile" and "source_in_all.sh" script with your "Network" and "VM Resource" settings.
 ### NOTE 2.1: Replace YOUR_PUBLIC_HOSTNAME and YOUR_PUBLIC_IP to enable kubectl to work remotely too.
-
+ 
 
 
 ## ====== START underlying Hypervisor (Hardware / VM) config ======
