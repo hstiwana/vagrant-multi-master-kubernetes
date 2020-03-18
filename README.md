@@ -12,7 +12,7 @@ Vagrant CentOS based Multi-Master [HA] Kubernetes lab
 
 Following was done on a RHEL 7.4 running physical server and it is known to work.
 we are creating a separate volume of 100G to store our VM images.
-
+ 
 ```
 lvcreate -L +100G -n kubernetes vg00
 mkfs.ext4 /dev/mapper/vg00-kubernetes
